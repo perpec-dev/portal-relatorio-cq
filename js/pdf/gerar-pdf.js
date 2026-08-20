@@ -14,9 +14,11 @@
       impressa vê quais eram as alternativas e qual foi marcada — é o que o
       formulário controlado em papel mostra.
 
-   Cor com parcimônia: preto e cinza no corpo, vermelho só onde tem que puxar
-   o olho (achado, laudo não conforme, carimbo de rascunho) e verde no
-   APROVADO. Nada de tarja decorativa.
+   3) TUDO EM TINTA CHEIA. Nada de texto cinza: o documento é conferido
+      impresso, às vezes numa cópia de cópia, e cinza claro simplesmente some.
+      A hierarquia vem de tamanho, peso e caixa alta. Vermelho só onde tem que
+      puxar o olho (achado, laudo não conforme, carimbo de rascunho) e verde no
+      APROVADO. Nada de tarja decorativa.
    ========================================================================== */
 
 window.GerarPDF = (function () {
@@ -28,20 +30,24 @@ window.GerarPDF = (function () {
   const TOPO = 28;                            // 1ª linha abaixo do cabeçalho
   const BASE = 281;                           // última linha acima do rodapé
 
-  const ALT_FAIXA = 6.4;                      // altura da faixa de seção
-  const LINHA = 3.75;                         // entrelinha do corpo
-  const PAD = 3.6;                            // respiro vertical da célula
+  const ALT_FAIXA = 7.2;                      // altura da faixa de seção
+  const LINHA = 4.3;                          // entrelinha do corpo
+  const PAD = 4;                              // respiro vertical da célula
 
   /* Colunas da tabela de identificação e da tabela de checklist. */
   const C_ROTULO = 52;
-  const C_PERGUNTA = 82, C_OPCOES = 46;
+  const C_PERGUNTA = 84, C_OPCOES = 44;
 
-  /* ---------------- Paleta ---------------- */
+  /* ---------------- Paleta ----------------
+     TEXTO CINZA NÃO EXISTE NESTE DOCUMENTO. Cinza claro é confortável na tela
+     e some na impressão a laser — e este relatório é conferido no papel, em
+     galpão, muitas vezes numa cópia de cópia. Toda letra sai em tinta cheia; a
+     hierarquia vem de tamanho, peso e caixa alta, nunca de desbotar.
+
+     Sobra em cinza só o que NÃO é texto: o fio da grade e a zebra das linhas. */
   const TINTA   = [24, 22, 21];
-  const GRAFITE = [88, 84, 80];
-  const CINZA   = [140, 135, 130];
-  const HAIRLINE= [214, 209, 203];
-  const ZEBRA   = [248, 247, 245];
+  const GRADE   = [112, 107, 102];   // fio da tabela: escuro o bastante para imprimir
+  const ZEBRA   = [242, 240, 237];
   const PAPEL   = [255, 255, 255];
   const VERMELHO= [193, 39, 45];
   const VERDE   = [30, 106, 58];
@@ -131,15 +137,15 @@ window.GerarPDF = (function () {
         try { pdf.addImage(logo, 'PNG', ML, 6.4, 36, 9.7); } catch (e) { /* segue sem logo */ }
       }
 
-      fonte('bold', 11); setC(TINTA);
-      pdf.text(String(d.titulo).toUpperCase(), W - MR, 11.4, { align: 'right' });
+      fonte('bold', 12.5); setC(TINTA);
+      pdf.text(String(d.titulo).toUpperCase(), W - MR, 11.6, { align: 'right' });
 
-      fonte('normal', 7.4); setC(CINZA);
+      fonte('normal', 8.4); setC(TINTA);
       pdf.text([
         d.numero,
         d.docRef ? 'Código ' + d.docRef : '',
         d.docRevisao ? 'Rev. ' + d.docRevisao : ''
-      ].filter(Boolean).join('   •   '), W - MR, 15.9, { align: 'right' });
+      ].filter(Boolean).join('   •   '), W - MR, 16.4, { align: 'right' });
 
       // Filete preto de ponta a ponta com o naco vermelho por cima, à
       // esquerda. É o único enfeite fixo do documento.
@@ -154,24 +160,24 @@ window.GerarPDF = (function () {
        com laudo emitido em cima de uma mesa de inspeção. */
     function carimboRascunho() {
       const texto = 'RASCUNHO — SEM VALOR DE LAUDO';
-      fonte('bold', 7);
-      const largura = pdf.getTextWidth(texto) + 6;
+      fonte('bold', 8);
+      const largura = pdf.getTextWidth(texto) + 6.4;
       const x = W - MR - largura;
-      setD(VERMELHO); pdf.setLineWidth(0.35);
-      pdf.rect(x, 22.4, largura, 4.6);
+      setD(VERMELHO); pdf.setLineWidth(0.4);
+      pdf.rect(x, 22.1, largura, 5.3);
       setC(VERMELHO);
-      pdf.text(texto, x + 3, 25.55);
+      pdf.text(texto, x + 3.2, 25.7);
     }
 
     function rodape(pagina, total) {
-      setD(HAIRLINE); pdf.setLineWidth(0.15);
-      pdf.line(ML, 284.6, W - MR, 284.6);
+      setD(GRADE); pdf.setLineWidth(0.2);
+      pdf.line(ML, 284.4, W - MR, 284.4);
 
-      fonte('normal', 6.6); setC(CINZA);
+      fonte('normal', 7.4); setC(TINTA);
       pdf.text(CONFIG.EMPRESA + '  •  ' + d.docRef +
-        (d.schemaVersao ? '  •  formulário ' + d.schemaVersao : ''), ML, 288.4);
-      pdf.text(d.numero, W / 2, 288.4, { align: 'center' });
-      pdf.text('Página ' + pagina + ' de ' + total, W - MR, 288.4, { align: 'right' });
+        (d.schemaVersao ? '  •  formulário ' + d.schemaVersao : ''), ML, 288.6);
+      pdf.text(d.numero, W / 2, 288.6, { align: 'center' });
+      pdf.text('Página ' + pagina + ' de ' + total, W - MR, 288.6, { align: 'right' });
     }
 
     function novaPagina() {
@@ -190,9 +196,9 @@ window.GerarPDF = (function () {
       setF(TINTA); pdf.rect(ML, y, CW, ALT_FAIXA, 'F');
       setF(VERMELHO); pdf.rect(ML, y, 1.8, ALT_FAIXA, 'F');
 
-      fonte('bold', 7.4); setC([250, 248, 247]);
+      fonte('bold', 8.4); setC([250, 248, 247]);
       pdf.text(String(titulo).toUpperCase() + (continuacao ? '  (continuação)' : ''),
-        ML + 4.4, y + 4.35, { charSpace: 0.22 });
+        ML + 4.4, y + 4.9, { charSpace: 0.22 });
       y += ALT_FAIXA;
     }
 
@@ -220,56 +226,64 @@ window.GerarPDF = (function () {
 
     /* ---------------- Linha rótulo/valor ---------------- */
     function linhaValor(rotulo, valor) {
-      fonte('bold', 7.2);
+      fonte('bold', 8.2);
       const chave = pdf.splitTextToSize(String(rotulo).toUpperCase(), C_ROTULO - 6.4);
-      fonte('normal', 8.8);
+      fonte('normal', 10);
       const texto = pdf.splitTextToSize(String(valor == null || valor === '' ? '—' : valor),
         CW - C_ROTULO - 7);
       // O rótulo também entra na conta: rótulo longo quebrava em duas linhas e
       // vazava para fora da célula, que fora medida só pelo valor.
-      const altura = Math.max(7.4, Math.max(chave.length, texto.length) * LINHA + PAD);
+      const altura = Math.max(8.6, Math.max(chave.length, texto.length) * LINHA + PAD);
 
       return {
         altura: altura,
         pintar: function (yy) {
-          setD(HAIRLINE); pdf.setLineWidth(0.15);
+          setD(GRADE); pdf.setLineWidth(0.2);
           pdf.rect(ML, yy, CW, altura);
           pdf.line(ML + C_ROTULO, yy, ML + C_ROTULO, yy + altura);
 
-          fonte('bold', 7.2); setC(CINZA);
-          pdf.text(chave, ML + 3.2, yy + 4.9, { charSpace: 0.15 });
+          // Rótulo em caixa alta e negrito, valor em corpo maior: a diferença
+          // entre os dois é de peso e tamanho, não de cor.
+          fonte('bold', 8.2); setC(TINTA);
+          pdf.text(chave, ML + 3.2, yy + 5.7, { charSpace: 0.15 });
 
-          fonte('normal', 8.8); setC(TINTA);
-          pdf.text(texto, ML + C_ROTULO + 3.4, yy + 4.9);
+          fonte('normal', 10); setC(TINTA);
+          pdf.text(texto, ML + C_ROTULO + 3.4, yy + 5.7);
         }
       };
     }
 
     /* ---------------- Caixinha do checklist ---------------- */
-    const LADO = 2.9;
+    const LADO = 3.3;
 
     function caixinha(x, yy, marcada, alerta) {
       const cor = alerta ? VERMELHO : TINTA;
       if (marcada) {
-        setF(cor); setD(cor); pdf.setLineWidth(0.25);
+        setF(cor); setD(cor); pdf.setLineWidth(0.3);
         pdf.rect(x, yy, LADO, LADO, 'FD');
 
-        setD(PAPEL); pdf.setLineWidth(0.42);
+        setD(PAPEL); pdf.setLineWidth(0.48);
         pdf.setLineCap('round'); pdf.setLineJoin('round');
-        pdf.lines([[0.7, 0.8], [1.3, -1.5]], x + 0.6, yy + 1.45, [1, 1], 'S', false);
+        pdf.lines([[0.8, 0.9], [1.5, -1.7]], x + 0.7, yy + 1.65, [1, 1], 'S', false);
         pdf.setLineCap('butt'); pdf.setLineJoin('miter');
       } else {
-        setD(CINZA); pdf.setLineWidth(0.2);
+        // Caixa vazia também em tinta cheia: contorno claro sumia na cópia e a
+        // pergunta parecia não ter alternativa nenhuma.
+        setD(TINTA); pdf.setLineWidth(0.25);
         pdf.rect(x, yy, LADO, LADO);
       }
     }
 
-    /* Todas as alternativas da pergunta, centralizadas na coluna. */
+    /* Todas as alternativas da pergunta, centralizadas na coluna. A marcada se
+       distingue pela caixa cheia e pelo negrito — as outras saem em tinta
+       cheia também, só que em peso normal. */
     function grupoOpcoes(opcoes, x, largura, base) {
-      const GAP = 1.2, ENTRE = 3.2;
-      fonte('bold', 7.6);
+      const GAP = 1.3, ENTRE = 3.2;
 
+      // Mede cada rótulo com o peso em que ele vai ser desenhado: negrito é
+      // mais largo, e medir tudo em negrito jogaria o grupo fora do centro.
       const itens = opcoes.map(function (op) {
+        fonte(op.marcada ? 'bold' : 'normal', 8.6);
         return { op: op, w: pdf.getTextWidth(op.rotulo) };
       });
       const total = itens.reduce(function (s, it) { return s + LADO + GAP + it.w; }, 0) +
@@ -278,11 +292,11 @@ window.GerarPDF = (function () {
       let cx = x + Math.max(2.5, (largura - total) / 2);
       itens.forEach(function (it) {
         const destaque = it.op.marcada && it.op.alerta;
-        caixinha(cx, base - 2.3, it.op.marcada, destaque);
+        caixinha(cx, base - 2.6, it.op.marcada, destaque);
         cx += LADO + GAP;
 
-        fonte('bold', 7.6);
-        setC(it.op.marcada ? (destaque ? VERMELHO : TINTA) : CINZA);
+        fonte(it.op.marcada ? 'bold' : 'normal', 8.6);
+        setC(destaque ? VERMELHO : TINTA);
         pdf.text(it.op.rotulo, cx, base);
         cx += it.w + ENTRE;
       });
@@ -292,12 +306,12 @@ window.GerarPDF = (function () {
     function linhaPergunta(p, indice) {
       const C3 = CW - C_PERGUNTA - C_OPCOES;
 
-      fonte('normal', 8.6);
+      fonte('normal', 9.8);
       const rotulo = pdf.splitTextToSize(p.label, C_PERGUNTA - 6.4);
-      fonte('normal', 8);
+      fonte('normal', 9);
       const obs = p.observacao ? pdf.splitTextToSize(p.observacao, C3 - 6.4) : [];
 
-      const altura = Math.max(8.2, Math.max(rotulo.length, obs.length, 1) * LINHA + PAD);
+      const altura = Math.max(9.4, Math.max(rotulo.length, obs.length, 1) * LINHA + PAD);
       const opcoes = p.opcoes && p.opcoes.length
         ? p.opcoes
         : [{ rotulo: p.resposta, marcada: true, alerta: p.alerta }];
@@ -307,22 +321,21 @@ window.GerarPDF = (function () {
         pintar: function (yy) {
           if (indice % 2 === 1) { setF(ZEBRA); pdf.rect(ML, yy, CW, altura, 'F'); }
 
-          setD(HAIRLINE); pdf.setLineWidth(0.15);
+          setD(GRADE); pdf.setLineWidth(0.2);
           pdf.rect(ML, yy, CW, altura);
           pdf.line(ML + C_PERGUNTA, yy, ML + C_PERGUNTA, yy + altura);
           pdf.line(ML + C_PERGUNTA + C_OPCOES, yy, ML + C_PERGUNTA + C_OPCOES, yy + altura);
 
-          fonte('normal', 8.6); setC(TINTA);
-          pdf.text(rotulo, ML + 3.2, yy + 5.1);
+          fonte('normal', 9.8); setC(TINTA);
+          pdf.text(rotulo, ML + 3.2, yy + 5.9);
 
-          grupoOpcoes(opcoes, ML + C_PERGUNTA, C_OPCOES, yy + 5.1);
+          grupoOpcoes(opcoes, ML + C_PERGUNTA, C_OPCOES, yy + 5.9);
 
           if (obs.length) {
-            fonte('normal', 8);
-            // A observação de um achado é a descrição da não conformidade:
-            // sai em tinta cheia, não em cinza de nota de rodapé.
-            setC(p.alerta ? TINTA : GRAFITE);
-            pdf.text(obs, ML + C_PERGUNTA + C_OPCOES + 3.2, yy + 5.1);
+            // A observação é a descrição da não conformidade. Sai em tinta
+            // cheia, como todo o resto.
+            fonte('normal', 9); setC(TINTA);
+            pdf.text(obs, ML + C_PERGUNTA + C_OPCOES + 3.2, yy + 5.9);
           }
         }
       };
@@ -365,7 +378,7 @@ window.GerarPDF = (function () {
       for (let i = 0; i < d.fotos.length; i += 2) {
         const par = d.fotos.slice(i, i + 2);
         const alturas = par.map(alturaDe);
-        const altura = Math.max.apply(null, alturas) + 11;
+        const altura = Math.max.apply(null, alturas) + 12.5;
         const inicio = i;
 
         linhas.push({
@@ -381,21 +394,21 @@ window.GerarPDF = (function () {
               try {
                 pdf.addImage(f.dataUrl, 'JPEG', xc, yy + 3, largura, h, undefined, 'FAST');
               } catch (e) {
-                fonte('normal', 7.4); setC(CINZA);
+                fonte('normal', 8.4); setC(TINTA);
                 pdf.text('[imagem indisponível]', x + 2, yy + 9);
               }
-              setD(HAIRLINE); pdf.setLineWidth(0.2);
+              setD(GRADE); pdf.setLineWidth(0.25);
               pdf.rect(xc, yy + 3, largura, h);
 
-              fonte('bold', 7); setC(TINTA);
+              fonte('bold', 8); setC(TINTA);
               const etiqueta = 'FOTO ' + Util.p2(inicio + k + 1);
-              pdf.text(etiqueta, x, yy + h + 6.6);
+              pdf.text(etiqueta, x, yy + h + 7.4);
 
               if (f.legenda) {
-                const desloc = pdf.getTextWidth(etiqueta) + 2;
-                fonte('normal', 7); setC(CINZA);
+                const desloc = pdf.getTextWidth(etiqueta) + 2.2;
+                fonte('normal', 8); setC(TINTA);
                 pdf.text(pdf.splitTextToSize('— ' + f.legenda, col - desloc)[0],
-                  x + desloc, yy + h + 6.6);
+                  x + desloc, yy + h + 7.4);
               }
             });
           }
@@ -407,33 +420,33 @@ window.GerarPDF = (function () {
     /* ---------------- Laudo ----------------
        Faixa, veredito e observação são um bloco só: laudo partido entre duas
        folhas é exatamente o que não pode acontecer num documento assinado. */
-    const corLaudo = d.laudo === 'aprovado' ? VERDE : (d.laudo ? VERMELHO : CINZA);
+    const corLaudo = d.laudo === 'aprovado' ? VERDE : (d.laudo ? VERMELHO : TINTA);
 
-    fonte('normal', 8.6);
+    fonte('normal', 10);
     const obsLaudo = pdf.splitTextToSize(d.observacoes || '—', CW - C_ROTULO - 7);
-    const altObs = Math.max(9, obsLaudo.length * LINHA + PAD);
-    const altVeredito = 13;
+    const altObs = Math.max(10, obsLaudo.length * LINHA + PAD);
+    const altVeredito = 15;
 
-    // 44 mm é o que o bloco de assinatura ocupa abaixo da observação. Laudo,
+    // 46 mm é o que o bloco de assinatura ocupa abaixo da observação. Laudo,
     // veredito e assinatura vão para a mesma folha ou descem juntos.
-    garantir(ALT_FAIXA + altVeredito + altObs + 44);
+    garantir(ALT_FAIXA + altVeredito + altObs + 46);
 
     faixa(d.tituloLaudo || 'Laudo', false);
 
-    setD(HAIRLINE); pdf.setLineWidth(0.15);
+    setD(GRADE); pdf.setLineWidth(0.2);
     pdf.rect(ML, y, CW, altVeredito);
     setF(corLaudo); pdf.rect(ML, y, 2.4, altVeredito, 'F');
 
-    fonte('bold', 16); setC(corLaudo);
-    pdf.text(d.laudoRotulo, ML + CW / 2, y + 8.9, { align: 'center' });
+    fonte('bold', 18); setC(corLaudo);
+    pdf.text(d.laudoRotulo, ML + CW / 2, y + 10.2, { align: 'center' });
     y += altVeredito;
 
     pdf.rect(ML, y, CW, altObs);
     pdf.line(ML + C_ROTULO, y, ML + C_ROTULO, y + altObs);
-    fonte('bold', 7.2); setC(CINZA);
-    pdf.text(String(d.rotuloObs).toUpperCase(), ML + 3.2, y + 4.9, { charSpace: 0.15 });
-    fonte('normal', 8.6); setC(TINTA);
-    pdf.text(obsLaudo, ML + C_ROTULO + 3.4, y + 4.9);
+    fonte('bold', 8.2); setC(TINTA);
+    pdf.text(String(d.rotuloObs).toUpperCase(), ML + 3.2, y + 5.7, { charSpace: 0.15 });
+    fonte('normal', 10); setC(TINTA);
+    pdf.text(obsLaudo, ML + C_ROTULO + 3.4, y + 5.7);
     y += altObs + 12;
 
     /* ---------------- Assinatura ---------------- */
@@ -454,30 +467,30 @@ window.GerarPDF = (function () {
     pdf.line(ML + 8, yLinha, ML + meia - 8, yLinha);
     pdf.line(ML + meia + 8, yLinha, W - MR - 8, yLinha);
 
-    fonte('bold', 9); setC(TINTA);
-    pdf.text(d.inspetorNome || '—', ML + meia / 2, yLinha + 4.6, { align: 'center' });
-    pdf.text(Util.fmtData(d.dataInspecao), ML + meia + meia / 2, yLinha + 4.6, { align: 'center' });
+    fonte('bold', 10.5); setC(TINTA);
+    pdf.text(d.inspetorNome || '—', ML + meia / 2, yLinha + 5.4, { align: 'center' });
+    pdf.text(Util.fmtData(d.dataInspecao), ML + meia + meia / 2, yLinha + 5.4, { align: 'center' });
 
-    fonte('normal', 6.8); setC(CINZA);
-    pdf.text('Assinatura do inspetor', ML + meia / 2, yLinha + 8.4, { align: 'center' });
-    pdf.text(String(d.rotuloData), ML + meia + meia / 2, yLinha + 8.4, { align: 'center' });
+    fonte('normal', 8); setC(TINTA);
+    pdf.text('Assinatura do inspetor', ML + meia / 2, yLinha + 9.8, { align: 'center' });
+    pdf.text(String(d.rotuloData), ML + meia + meia / 2, yLinha + 9.8, { align: 'center' });
 
-    y = yLinha + 14;
+    y = yLinha + 16;
 
     if (d.revisao > 0) {
       // O motivo da revisão é o que justifica o documento existir. Ele quebra
       // em quantas linhas precisar; a tarja cresce junto em vez de cortá-lo.
-      fonte('normal', 7.8);
-      const motivo = pdf.splitTextToSize('Motivo: ' + (d.motivoRevisao || '—'), CW - 30);
-      const altRev = Math.max(8, motivo.length * 3.4 + 3.4);
+      fonte('normal', 8.8);
+      const motivo = pdf.splitTextToSize('Motivo: ' + (d.motivoRevisao || '—'), CW - 34);
+      const altRev = Math.max(9.4, motivo.length * 3.9 + 3.8);
 
       garantir(altRev + 1);
-      setD(HAIRLINE); pdf.setLineWidth(0.15);
+      setD(GRADE); pdf.setLineWidth(0.2);
       pdf.rect(ML, y, CW, altRev);
-      fonte('bold', 7); setC(CINZA);
-      pdf.text('REVISÃO ' + d.revisao, ML + 3.2, y + 5.2, { charSpace: 0.15 });
-      fonte('normal', 7.8); setC(GRAFITE);
-      pdf.text(motivo, ML + 26, y + 5.2);
+      fonte('bold', 8); setC(TINTA);
+      pdf.text('REVISÃO ' + d.revisao, ML + 3.2, y + 5.9, { charSpace: 0.15 });
+      fonte('normal', 8.8); setC(TINTA);
+      pdf.text(motivo, ML + 30, y + 5.9);
     }
 
     /* Rodapé em todas as páginas: o total só é conhecido agora. */

@@ -17,10 +17,13 @@
 window.GerarDOCX = (function () {
   'use strict';
 
-  const COR_DARK = '181615', COR_RED = 'C1272D', COR_GRAY = '8A857F';
-  const COR_GRAFITE = '585450';
-  const COR_GREEN = '1E6A3A', COR_BORDA = 'D6D1CB', COR_CAB = '181615';
-  const COR_ZEBRA = 'F8F7F5';
+  /* Sem texto cinza, pelo mesmo motivo do PDF: o documento acaba impresso e
+     cinza claro some no papel. COR_GRAY continua existindo só para não
+     espalhar a mudança por trinta chamadas — e aponta para o preto. */
+  const COR_DARK = '181615', COR_RED = 'C1272D', COR_GRAY = '181615';
+  const COR_GRAFITE = '181615';
+  const COR_GREEN = '1E6A3A', COR_BORDA = '706B66', COR_CAB = '181615';
+  const COR_ZEBRA = 'F2F0ED';
 
   /* Mesma família do PDF. Quem receber o arquivo sem a fonte instalada vê a
      substituta do Word — o conteúdo não muda, só o acabamento. */
@@ -69,7 +72,7 @@ window.GerarDOCX = (function () {
     return new D.TextRun({
       text: String(conteudo == null ? '' : conteudo),
       bold: !!o.negrito, italics: !!o.italico,
-      size: o.tamanho || 19,              // meio-pontos: 19 ≈ 9,5pt
+      size: o.tamanho || 21,              // meio-pontos: 21 ≈ 10,5pt
       color: o.cor || COR_DARK,
       font: o.fonte || FONTE
     });
@@ -117,7 +120,7 @@ window.GerarDOCX = (function () {
   function faixaTitulo(D, titulo, colunas) {
     return new D.TableRow({
       children: [celula(D,
-        texto(D, String(titulo).toUpperCase(), { negrito: true, cor: 'FAF8F7', tamanho: 17, depois: 0 }),
+        texto(D, String(titulo).toUpperCase(), { negrito: true, cor: 'FAF8F7', tamanho: 19, depois: 0 }),
         { largura: LARGURA_TOTAL, span: colunas || 3, fundo: COR_CAB })]
     });
   }
@@ -133,10 +136,10 @@ window.GerarDOCX = (function () {
     opcoes.forEach(function (op, i) {
       const destaque = op.marcada && op.alerta;
       const cor = op.marcada ? (destaque ? COR_RED : COR_DARK) : COR_GRAY;
-      if (i) runs.push(trecho(D, '  ', { tamanho: 17 }));
+      if (i) runs.push(trecho(D, '  ', { tamanho: 19 }));
       runs.push(trecho(D, op.marcada ? '☒' : '☐',
-        { cor: cor, tamanho: 19, fonte: FONTE_SIMBOLO }));
-      runs.push(trecho(D, ' ' + op.rotulo, { cor: cor, tamanho: 17, negrito: true }));
+        { cor: cor, tamanho: 21, fonte: FONTE_SIMBOLO }));
+      runs.push(trecho(D, ' ' + op.rotulo, { cor: cor, tamanho: 19, negrito: true }));
     });
 
     return celula(D, paragrafo(D, runs, { alinhar: D.AlignmentType.CENTER, depois: 0 }),
@@ -150,16 +153,16 @@ window.GerarDOCX = (function () {
   function rodape(D, d) {
     const runs = [trecho(D, CONFIG.EMPRESA + '  •  ' + d.docRef +
       (d.schemaVersao ? '  •  formulário ' + d.schemaVersao : '') +
-      '  •  ' + d.numero, { cor: COR_GRAY, tamanho: 14 })];
+      '  •  ' + d.numero, { cor: COR_GRAY, tamanho: 16 })];
 
     if (D.PageNumber && D.PageNumber.CURRENT) {
-      runs.push(trecho(D, '  •  Página ', { cor: COR_GRAY, tamanho: 14 }));
+      runs.push(trecho(D, '  •  Página ', { cor: COR_GRAY, tamanho: 16 }));
       runs.push(new D.TextRun({
-        children: [D.PageNumber.CURRENT], size: 14, color: COR_GRAY, font: FONTE
+        children: [D.PageNumber.CURRENT], size: 16, color: COR_GRAY, font: FONTE
       }));
-      runs.push(trecho(D, ' de ', { cor: COR_GRAY, tamanho: 14 }));
+      runs.push(trecho(D, ' de ', { cor: COR_GRAY, tamanho: 16 }));
       runs.push(new D.TextRun({
-        children: [D.PageNumber.TOTAL_PAGES], size: 14, color: COR_GRAY, font: FONTE
+        children: [D.PageNumber.TOTAL_PAGES], size: 16, color: COR_GRAY, font: FONTE
       }));
     }
     return paragrafo(D, runs, { alinhar: D.AlignmentType.CENTER, depois: 0 });
@@ -182,12 +185,12 @@ window.GerarDOCX = (function () {
       } catch (e) { /* documento segue sem logo */ }
     }
 
-    filhos.push(texto(D, d.titulo.toUpperCase(), { negrito: true, tamanho: 26, depois: 20 }));
+    filhos.push(texto(D, d.titulo.toUpperCase(), { negrito: true, tamanho: 28, depois: 20 }));
     filhos.push(texto(D, [
       d.numero,
       d.docRef ? 'Código ' + d.docRef : '',
       d.docRevisao ? 'Rev. ' + d.docRevisao : ''
-    ].filter(Boolean).join('   •   '), { cor: COR_GRAY, tamanho: 16, depois: 40 }));
+    ].filter(Boolean).join('   •   '), { cor: COR_GRAY, tamanho: 18, depois: 40 }));
 
     // Filete vermelho fechando o cabeçalho — o mesmo detalhe do PDF.
     filhos.push(new D.Paragraph({
@@ -198,7 +201,7 @@ window.GerarDOCX = (function () {
 
     if (d.status !== 'concluido') {
       filhos.push(texto(D, 'RASCUNHO — SEM VALOR DE LAUDO',
-        { negrito: true, cor: COR_RED, tamanho: 18, depois: 160 }));
+        { negrito: true, cor: COR_RED, tamanho: 20, depois: 160 }));
     }
 
     /* ---------------- Seções ----------------
@@ -212,7 +215,7 @@ window.GerarDOCX = (function () {
       secao.linhas.forEach(function (par) {
         linhas.push(linha(D, [
           celula(D, texto(D, String(par[0]).toUpperCase(),
-            { negrito: true, cor: COR_GRAY, tamanho: 16, depois: 0 }), { largura: C_ROTULO }),
+            { negrito: true, cor: COR_GRAY, tamanho: 18, depois: 0 }), { largura: C_ROTULO }),
           celula(D, texto(D, par[1], { depois: 0 }),
             { largura: LARGURA_TOTAL - C_ROTULO, span: 2 })
         ]));
@@ -227,7 +230,7 @@ window.GerarDOCX = (function () {
           // A observação de um achado é a descrição da não conformidade:
           // sai em tinta cheia, não em cinza de nota de rodapé.
           celula(D, texto(D, p.observacao || '',
-            { cor: p.alerta ? COR_DARK : COR_GRAFITE, tamanho: 17, depois: 0 }),
+            { cor: p.alerta ? COR_DARK : COR_GRAFITE, tamanho: 19, depois: 0 }),
             { largura: LARGURA_TOTAL - C_ROTULO - 2000 - C_OPCOES, fundo: fundo })
         ]));
       });
@@ -264,8 +267,8 @@ window.GerarDOCX = (function () {
             conteudo.push(texto(D, '[imagem indisponível]', { cor: COR_GRAY, italico: true }));
           }
           conteudo.push(paragrafo(D, [
-            trecho(D, 'FOTO ' + Util.p2(i + k + 1), { negrito: true, tamanho: 15 }),
-            trecho(D, f.legenda ? '  ' + f.legenda : '', { cor: COR_GRAY, tamanho: 15 })
+            trecho(D, 'FOTO ' + Util.p2(i + k + 1), { negrito: true, tamanho: 17 }),
+            trecho(D, f.legenda ? '  ' + f.legenda : '', { cor: COR_GRAY, tamanho: 17 })
           ], { alinhar: D.AlignmentType.CENTER, depois: 0 }));
           return celula(D, conteudo, { largura: LARGURA_TOTAL / 2 });
         });
@@ -286,12 +289,12 @@ window.GerarDOCX = (function () {
     filhos.push(tabela(D, [
       faixaTitulo(D, d.tituloLaudo || 'Laudo', 2),
       linha(D, [celula(D, texto(D, d.laudoRotulo, {
-        negrito: true, tamanho: 30, cor: corLaudo,
+        negrito: true, tamanho: 34, cor: corLaudo,
         alinhar: D.AlignmentType.CENTER, depois: 0
       }), { largura: LARGURA_TOTAL, span: 2 })]),
       linha(D, [
         celula(D, texto(D, String(d.rotuloObs).toUpperCase(),
-          { negrito: true, cor: COR_GRAY, tamanho: 16, depois: 0 }), { largura: 1400 }),
+          { negrito: true, cor: COR_GRAY, tamanho: 18, depois: 0 }), { largura: 1400 }),
         celula(D, texto(D, d.observacoes || '—', { depois: 0 }),
           { largura: LARGURA_TOTAL - 1400 })
       ])
@@ -320,7 +323,7 @@ window.GerarDOCX = (function () {
     celulaAssinatura.push(texto(D, d.inspetorNome || '—',
       { negrito: true, alinhar: D.AlignmentType.CENTER, depois: 10 }));
     celulaAssinatura.push(texto(D, 'Assinatura do inspetor',
-      { cor: COR_GRAY, tamanho: 15, alinhar: D.AlignmentType.CENTER, depois: 0 }));
+      { cor: COR_GRAY, tamanho: 17, alinhar: D.AlignmentType.CENTER, depois: 0 }));
 
     filhos.push(new D.Table({
       width: { size: LARGURA_TOTAL, type: D.WidthType.DXA },
@@ -338,14 +341,14 @@ window.GerarDOCX = (function () {
             texto(D, Util.fmtData(d.dataInspecao),
               { negrito: true, alinhar: D.AlignmentType.CENTER, depois: 10 }),
             texto(D, d.rotuloData,
-              { cor: COR_GRAY, tamanho: 15, alinhar: D.AlignmentType.CENTER, depois: 0 })
+              { cor: COR_GRAY, tamanho: 17, alinhar: D.AlignmentType.CENTER, depois: 0 })
           ], { largura: LARGURA_TOTAL / 2 })
       ])]
     }));
 
     if (d.revisao > 0) {
       filhos.push(texto(D, 'Revisão ' + d.revisao + ' — motivo: ' + (d.motivoRevisao || '—'),
-        { italico: true, cor: COR_GRAY, tamanho: 16, antes: 200 }));
+        { italico: true, cor: COR_GRAY, tamanho: 18, antes: 200 }));
     }
 
     /* ---------------- Documento ---------------- */
