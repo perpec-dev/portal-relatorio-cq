@@ -144,6 +144,15 @@ function documentoFalso() {
     laudo: laudo,
     laudoRotulo: laudo === 'aprovado' ? 'APROVADO' : 'NÃO CONFORME',
     tituloLaudo: 'Laudo',
+    numeroBase: 'RIV-001-26',
+    historico: longo ? [
+      { revisao: 0, numero: 'RIV-001-26', motivo: '', emitidoEm: '2026-08-14T09:40:00Z',
+        concluido: true, inspetorNome: 'João Victor Amaral', atual: false },
+      { revisao: 1, numero: 'RIV-001-26 Rev.1',
+        motivo: 'Rastreabilidade informada trocada na emissão anterior.',
+        emitidoEm: '2026-08-20T14:30:00Z', concluido: true,
+        inspetorNome: 'João Victor Amaral', atual: true }
+    ] : [],
     inspetorNome: 'João Victor Amaral',
     dataInspecao: '2026-08-20',
     rotuloData: 'Data da inspeção',

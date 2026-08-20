@@ -54,7 +54,18 @@ window.Storage = {
 };
 window.DB = {
   listarFotos: async function () { return []; },
-  registrarAcessoAssinatura: async function () {}
+  registrarAcessoAssinatura: async function () {},
+  listarRevisoes: async function () {
+    return [
+      { id: 'r1', numero: 'RIV-007-26', revisao: 0, motivo_revisao: null,
+        status: 'concluido', concluido_em: '2026-08-18T10:12:00Z',
+        inspetor_nome_snapshot: 'João Victor Amaral' },
+      { id: 'r2', numero: 'RIV-007-26 Rev.1', revisao: 1,
+        motivo_revisao: "Marcado 'Aprovado' por engano.",
+        status: 'concluido', concluido_em: '2026-08-20T14:30:00Z',
+        inspetor_nome_snapshot: 'João Victor Amaral' }
+    ];
+  }
 };
 </script>
 
@@ -91,7 +102,10 @@ Util.baixarBlob = function (nome, blob) { capturado = { nome: nome, blob: blob }
 
 const RELATORIO = {
   id: 'r1', tipo: 'inspecao-visual', schemaVersao: '1.0.0',
-  numero: 'RIV-007-26', revisao: 0, status: 'concluido', laudo: 'nao_conforme',
+  // Rev.0 que DEPOIS foi revisada: o documento tem que mostrar a série
+  // inteira, inclusive a revisão que o substituiu.
+  numero: 'RIV-007-26', numeroBase: 'RIV-007-26', revisao: 0,
+  status: 'concluido', laudo: 'nao_conforme',
   inspetorId: 'p1', inspetorNome: 'João Victor Amaral',
   concluidoEm: '2026-08-20T14:30:00Z', atualizadoEm: '2026-08-20T14:31:00Z',
   dados: {
@@ -140,6 +154,11 @@ const RELATORIO = {
     conferir('nº na identificação', acha(d.secoes[0], /^Relat/), 'RIV-007-26');
     conferir('descrição', acha(d.secoes[0], /^Descri/), 'Luva 4.1/2" IF — API 5CT');
     conferir('seções', d.secoes.length, 3);
+
+    conferir('histórico: nº de revisões', d.historico.length, 2);
+    conferir('histórico: data da Rev.1', Util.fmtDT(d.historico[1].emitidoEm), '20/08/2026 11:30');
+    conferir('histórico: marca a folha atual', d.historico[0].atual, true);
+    conferir('data da inspeção fora da assinatura', d.dataInspecao, '2026-08-20');
 
     const p = d.secoes[1].perguntas[5];
     conferir('checklist: nº de opções', p.opcoes.length, 3);

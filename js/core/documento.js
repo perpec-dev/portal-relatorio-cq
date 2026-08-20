@@ -38,6 +38,7 @@ window.Documento = (function () {
       docRevisao: schema.docRevisao || '',
       schemaVersao: relatorio.schemaVersao || schema.versao || '',
       numero: relatorio.numero || '(rascunho)',
+      numeroBase: relatorio.numeroBase || '',
       status: relatorio.status,
       revisao: relatorio.revisao || 0,
       motivoRevisao: relatorio.motivoRevisao || '',
@@ -52,8 +53,39 @@ window.Documento = (function () {
       rotuloObs: enc.campoObs ? enc.campoObs.label : 'OBS',
       secoes: [],
       fotos: [],
+      historico: [],
       assinatura: null
     };
+
+    /* ---- Histórico de revisões ----
+       Laudo emitido é imutável; corrigir gera um documento novo. Quem recebe
+       uma folha solta precisa enxergar a série inteira — quando cada revisão
+       saiu, por quem e por quê. É a cadeia que sustenta a correção em
+       auditoria, e ela não pode viver só no banco.
+
+       Só aparece quando existe mais de uma: num laudo nunca revisado, uma
+       tabela de uma linha só diria o que o cabeçalho já diz. */
+    if (relatorio.numeroBase) {
+      try {
+        const cadeia = await DB.listarRevisoes(relatorio.numeroBase);
+        if (cadeia.length > 1) {
+          doc.historico = cadeia.map(function (r) {
+            return {
+              revisao: r.revisao || 0,
+              numero: r.numero || '',
+              motivo: r.motivo_revisao || '',
+              emitidoEm: r.concluido_em || '',
+              concluido: r.status === 'concluido',
+              inspetorNome: r.inspetor_nome_snapshot || '',
+              atual: r.id === relatorio.id
+            };
+          });
+        }
+      } catch (e) {
+        // Documento sem o histórico ainda é documento. Sem o laudo, não.
+        console.warn('[documento] histórico de revisões indisponível:', e);
+      }
+    }
 
     /* ---- Seções ---- */
     RenderForm.secoesAtivas(schema).forEach(function (secao) {

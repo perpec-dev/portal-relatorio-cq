@@ -292,23 +292,34 @@ window.GerarDOCX = (function () {
         negrito: true, tamanho: 34, cor: corLaudo,
         alinhar: D.AlignmentType.CENTER, depois: 0
       }), { largura: LARGURA_TOTAL, span: 2 })]),
+      /* A data da inspeção é DADO do laudo, e é aqui que ela pertence. Ficava
+         sobre uma linha de assinatura ao lado do inspetor, como se alguém
+         tivesse que assinar a data. */
+      linha(D, [
+        celula(D, texto(D, String(d.rotuloData).toUpperCase(),
+          { negrito: true, tamanho: 18, depois: 0 }), { largura: 2400 }),
+        celula(D, texto(D, Util.fmtData(d.dataInspecao), { depois: 0 }),
+          { largura: LARGURA_TOTAL - 2400 })
+      ]),
       linha(D, [
         celula(D, texto(D, String(d.rotuloObs).toUpperCase(),
-          { negrito: true, cor: COR_GRAY, tamanho: 18, depois: 0 }), { largura: 1400 }),
+          { negrito: true, tamanho: 18, depois: 0 }), { largura: 2400 }),
         celula(D, texto(D, d.observacoes || '—', { depois: 0 }),
-          { largura: LARGURA_TOTAL - 1400 })
+          { largura: LARGURA_TOTAL - 2400 })
       ])
     ]));
     filhos.push(texto(D, '', { depois: 220 }));
 
-    /* ---------------- Assinatura ---------------- */
-    const celulaAssinatura = [];
+    /* ---------------- Assinatura ----------------
+       Uma coluna só, centralizada. São dois campos de naturezas diferentes —
+       uma assinatura e uma data — e lado a lado, cada um sobre a sua linha, o
+       documento parecia pedir duas assinaturas. A data subiu para o laudo. */
     if (d.assinatura) {
       const prop = (d.assinatura.altura && d.assinatura.largura)
         ? (d.assinatura.altura / d.assinatura.largura) : 0.35;
       const largura = 150;
       try {
-        celulaAssinatura.push(new D.Paragraph({
+        filhos.push(new D.Paragraph({
           alignment: D.AlignmentType.CENTER,
           spacing: { after: 0 },
           children: [new D.ImageRun({
@@ -318,37 +329,46 @@ window.GerarDOCX = (function () {
         }));
       } catch (e) { /* linha e nome continuam */ }
     }
-    celulaAssinatura.push(texto(D, '__________________________________',
-      { alinhar: D.AlignmentType.CENTER, cor: COR_DARK, depois: 20 }));
-    celulaAssinatura.push(texto(D, d.inspetorNome || '—',
+    filhos.push(texto(D, '__________________________________________',
+      { alinhar: D.AlignmentType.CENTER, depois: 20 }));
+    filhos.push(texto(D, d.inspetorNome || '—',
       { negrito: true, alinhar: D.AlignmentType.CENTER, depois: 10 }));
-    celulaAssinatura.push(texto(D, 'Assinatura do inspetor',
-      { cor: COR_GRAY, tamanho: 17, alinhar: D.AlignmentType.CENTER, depois: 0 }));
+    filhos.push(texto(D, 'Assinatura do inspetor',
+      { tamanho: 17, alinhar: D.AlignmentType.CENTER, depois: 0 }));
 
-    filhos.push(new D.Table({
-      width: { size: LARGURA_TOTAL, type: D.WidthType.DXA },
-      borders: {
-        top: { style: D.BorderStyle.NONE }, bottom: { style: D.BorderStyle.NONE },
-        left: { style: D.BorderStyle.NONE }, right: { style: D.BorderStyle.NONE },
-        insideHorizontal: { style: D.BorderStyle.NONE },
-        insideVertical: { style: D.BorderStyle.NONE }
-      },
-      rows: [linha(D, [
-          celula(D, celulaAssinatura, { largura: LARGURA_TOTAL / 2 }),
-          celula(D, [
-            texto(D, '__________________________________',
-              { alinhar: D.AlignmentType.CENTER, depois: 20 }),
-            texto(D, Util.fmtData(d.dataInspecao),
-              { negrito: true, alinhar: D.AlignmentType.CENTER, depois: 10 }),
-            texto(D, d.rotuloData,
-              { cor: COR_GRAY, tamanho: 17, alinhar: D.AlignmentType.CENTER, depois: 0 })
-          ], { largura: LARGURA_TOTAL / 2 })
-      ])]
-    }));
+    /* ---------------- Histórico de revisões ---------------- */
+    const historico = d.historico || [];
+    if (historico.length > 1) {
+      const H1 = 1300, H2 = 1900, H3 = 2400;
+      const cab = function (t, largura) {
+        return celula(D, texto(D, t, { negrito: true, tamanho: 18, depois: 0 }),
+          { largura: largura, fundo: COR_ZEBRA });
+      };
 
-    if (d.revisao > 0) {
-      filhos.push(texto(D, 'Revisão ' + d.revisao + ' — motivo: ' + (d.motivoRevisao || '—'),
-        { italico: true, cor: COR_GRAY, tamanho: 18, antes: 200 }));
+      const linhas = [
+        faixaTitulo(D, 'Histórico de revisões — ' + (d.numeroBase || d.numero), 4),
+        linha(D, [
+          cab('REVISÃO', H1), cab('EMITIDA EM', H2), cab('INSPETOR', H3),
+          cab('MOTIVO', LARGURA_TOTAL - H1 - H2 - H3)
+        ])
+      ];
+
+      historico.forEach(function (h) {
+        const forte = { negrito: !!h.atual, depois: 0 };
+        linhas.push(linha(D, [
+          celula(D, texto(D, 'Rev. ' + h.revisao, forte), { largura: H1 }),
+          // Data E hora: duas revisões no mesmo dia são comuns quando o laudo
+          // volta da conferência, e só a data não as ordena.
+          celula(D, texto(D, h.concluido ? Util.fmtDT(h.emitidoEm) : 'em elaboração', forte),
+            { largura: H2 }),
+          celula(D, texto(D, h.inspetorNome || '—', { depois: 0 }), { largura: H3 }),
+          celula(D, texto(D, h.motivo || (h.revisao === 0 ? 'Emissão original.' : '—'),
+            { depois: 0 }), { largura: LARGURA_TOTAL - H1 - H2 - H3 })
+        ]));
+      });
+
+      filhos.push(texto(D, '', { depois: 220 }));
+      filhos.push(tabela(D, linhas));
     }
 
     /* ---------------- Documento ---------------- */

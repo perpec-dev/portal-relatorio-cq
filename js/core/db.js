@@ -148,6 +148,20 @@ window.DB = (function () {
     return doBanco(Array.isArray(data) ? data[0] : data);
   }
 
+  /* A série inteira de um laudo compartilha `numero_base` — é ele, e não a
+     cadeia de origem_id, que junta Rev.0, Rev.1 e Rev.2 numa consulta só.
+     Devolve em ordem de revisão, do original ao mais recente. */
+  async function listarRevisoes(numeroBase) {
+    if (!numeroBase) return [];
+    const { data, error } = await sb()
+      .from('relatorios')
+      .select('id,numero,revisao,motivo_revisao,status,concluido_em,inspetor_nome_snapshot')
+      .eq('numero_base', numeroBase)
+      .order('revisao');
+    if (error) throw error;
+    return data || [];
+  }
+
   async function criarRevisao(id, motivo) {
     const { data, error } = await sb().rpc('criar_revisao', {
       p_id: id, p_motivo: motivo
@@ -317,7 +331,7 @@ window.DB = (function () {
     listarTipos: listarTipos, tipo: tipo,
     criarRascunho: criarRascunho, obterRelatorio: obterRelatorio,
     salvarRascunho: salvarRascunho, apagarRascunho: apagarRascunho,
-    concluir: concluir, criarRevisao: criarRevisao,
+    concluir: concluir, criarRevisao: criarRevisao, listarRevisoes: listarRevisoes,
     sugerirNumero: sugerirNumero, numeroEmUso: numeroEmUso,
     registrarAcessoAssinatura: registrarAcessoAssinatura,
     listarRelatorios: listarRelatorios,

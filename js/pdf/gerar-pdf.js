@@ -426,10 +426,11 @@ window.GerarPDF = (function () {
     const obsLaudo = pdf.splitTextToSize(d.observacoes || '—', CW - C_ROTULO - 7);
     const altObs = Math.max(10, obsLaudo.length * LINHA + PAD);
     const altVeredito = 15;
+    const altData = 9.6;
 
-    // 46 mm é o que o bloco de assinatura ocupa abaixo da observação. Laudo,
-    // veredito e assinatura vão para a mesma folha ou descem juntos.
-    garantir(ALT_FAIXA + altVeredito + altObs + 46);
+    // 40 mm é o que o bloco de assinatura ocupa abaixo do laudo. Veredito,
+    // data e assinatura vão para a mesma folha ou descem juntos.
+    garantir(ALT_FAIXA + altVeredito + altData + altObs + 40);
 
     faixa(d.tituloLaudo || 'Laudo', false);
 
@@ -441,56 +442,113 @@ window.GerarPDF = (function () {
     pdf.text(d.laudoRotulo, ML + CW / 2, y + 10.2, { align: 'center' });
     y += altVeredito;
 
-    pdf.rect(ML, y, CW, altObs);
-    pdf.line(ML + C_ROTULO, y, ML + C_ROTULO, y + altObs);
-    fonte('bold', 8.2); setC(TINTA);
-    pdf.text(String(d.rotuloObs).toUpperCase(), ML + 3.2, y + 5.7, { charSpace: 0.15 });
-    fonte('normal', 10); setC(TINTA);
-    pdf.text(obsLaudo, ML + C_ROTULO + 3.4, y + 5.7);
-    y += altObs + 12;
+    /* A data da inspeção é DADO do laudo, e é aqui que ela pertence. Ficava
+       sobre uma linha de assinatura ao lado do inspetor, como se alguém
+       tivesse que assinar a data. */
+    const celula = function (rotulo, valor, altura, linhas) {
+      pdf.rect(ML, y, CW, altura);
+      pdf.line(ML + C_ROTULO, y, ML + C_ROTULO, y + altura);
+      fonte('bold', 8.2); setC(TINTA);
+      pdf.text(String(rotulo).toUpperCase(), ML + 3.2, y + 5.7, { charSpace: 0.15 });
+      fonte('normal', 10); setC(TINTA);
+      pdf.text(linhas || valor, ML + C_ROTULO + 3.4, y + 5.7);
+      y += altura;
+    };
 
-    /* ---------------- Assinatura ---------------- */
-    const meia = CW / 2;
+    celula(d.rotuloData, Util.fmtData(d.dataInspecao), altData);
+    celula(d.rotuloObs, null, altObs, obsLaudo);
+    y += 12;
+
+    /* ---------------- Assinatura ----------------
+       Uma coluna só, centralizada. São dois campos de naturezas diferentes —
+       uma assinatura e uma data — e lado a lado, cada um sobre a sua linha,
+       o documento parecia pedir duas assinaturas. */
+    const larguraLinha = 88;
+    const xLinha = ML + (CW - larguraLinha) / 2;
+    const centro = ML + CW / 2;
 
     if (d.assinatura) {
       const prop = (d.assinatura.altura && d.assinatura.largura)
         ? (d.assinatura.altura / d.assinatura.largura) : 0.35;
-      const alt = Math.min(17, (meia - 26) * prop);
+      const alt = Math.min(17, (larguraLinha - 16) * prop);
       const larg = alt / prop;
       try {
-        pdf.addImage(d.assinatura.dataUrl, 'PNG', ML + (meia - larg) / 2, y - 1, larg, alt);
+        pdf.addImage(d.assinatura.dataUrl, 'PNG', centro - larg / 2, y - 1, larg, alt);
       } catch (e) { /* sem a imagem, a linha e o nome continuam valendo */ }
     }
 
     const yLinha = y + 17;
     setD(TINTA); pdf.setLineWidth(0.3);
-    pdf.line(ML + 8, yLinha, ML + meia - 8, yLinha);
-    pdf.line(ML + meia + 8, yLinha, W - MR - 8, yLinha);
+    pdf.line(xLinha, yLinha, xLinha + larguraLinha, yLinha);
 
     fonte('bold', 10.5); setC(TINTA);
-    pdf.text(d.inspetorNome || '—', ML + meia / 2, yLinha + 5.4, { align: 'center' });
-    pdf.text(Util.fmtData(d.dataInspecao), ML + meia + meia / 2, yLinha + 5.4, { align: 'center' });
-
+    pdf.text(d.inspetorNome || '—', centro, yLinha + 5.4, { align: 'center' });
     fonte('normal', 8); setC(TINTA);
-    pdf.text('Assinatura do inspetor', ML + meia / 2, yLinha + 9.8, { align: 'center' });
-    pdf.text(String(d.rotuloData), ML + meia + meia / 2, yLinha + 9.8, { align: 'center' });
+    pdf.text('Assinatura do inspetor', centro, yLinha + 9.8, { align: 'center' });
 
     y = yLinha + 16;
 
-    if (d.revisao > 0) {
-      // O motivo da revisão é o que justifica o documento existir. Ele quebra
-      // em quantas linhas precisar; a tarja cresce junto em vez de cortá-lo.
-      fonte('normal', 8.8);
-      const motivo = pdf.splitTextToSize('Motivo: ' + (d.motivoRevisao || '—'), CW - 34);
-      const altRev = Math.max(9.4, motivo.length * 3.9 + 3.8);
+    /* ---------------- Histórico de revisões ---------------- */
+    const historico = d.historico || [];
+    if (historico.length > 1) {
+      const H1 = 24, H2 = 34, H3 = 44, H4 = CW - 24 - 34 - 44;
 
-      garantir(altRev + 1);
-      setD(GRADE); pdf.setLineWidth(0.2);
-      pdf.rect(ML, y, CW, altRev);
-      fonte('bold', 8); setC(TINTA);
-      pdf.text('REVISÃO ' + d.revisao, ML + 3.2, y + 5.9, { charSpace: 0.15 });
-      fonte('normal', 8.8); setC(TINTA);
-      pdf.text(motivo, ML + 30, y + 5.9);
+      /* Cabeçalho de coluna: sem ele, "Rev. 1 | 20/08/2026 | João" obriga o
+         leitor a adivinhar se a data é a da revisão ou a da inspeção. */
+      const linhas = [{
+        altura: 7.6,
+        pintar: function (yy) {
+          setF(ZEBRA); pdf.rect(ML, yy, CW, 7.6, 'F');
+          setD(GRADE); pdf.setLineWidth(0.2);
+          pdf.rect(ML, yy, CW, 7.6);
+          pdf.line(ML + H1, yy, ML + H1, yy + 7.6);
+          pdf.line(ML + H1 + H2, yy, ML + H1 + H2, yy + 7.6);
+          pdf.line(ML + H1 + H2 + H3, yy, ML + H1 + H2 + H3, yy + 7.6);
+
+          fonte('bold', 8.2); setC(TINTA);
+          pdf.text('REVISÃO', ML + 4.4, yy + 5.1, { charSpace: 0.15 });
+          pdf.text('EMITIDA EM', ML + H1 + 3.2, yy + 5.1, { charSpace: 0.15 });
+          pdf.text('INSPETOR', ML + H1 + H2 + 3.2, yy + 5.1, { charSpace: 0.15 });
+          pdf.text('MOTIVO', ML + H1 + H2 + H3 + 3.2, yy + 5.1, { charSpace: 0.15 });
+        }
+      }];
+
+      historico.forEach(function (h) {
+        fonte('normal', 9);
+        const motivo = pdf.splitTextToSize(
+          h.motivo || (h.revisao === 0 ? 'Emissão original.' : '—'), H4 - 6);
+        const inspetor = pdf.splitTextToSize(h.inspetorNome || '—', H3 - 6);
+        const altura = Math.max(9.4,
+          Math.max(motivo.length, inspetor.length, 1) * LINHA + PAD);
+
+        linhas.push({
+          altura: altura,
+          pintar: function (yy) {
+            setD(GRADE); pdf.setLineWidth(0.2);
+            pdf.rect(ML, yy, CW, altura);
+            pdf.line(ML + H1, yy, ML + H1, yy + altura);
+            pdf.line(ML + H1 + H2, yy, ML + H1 + H2, yy + altura);
+            pdf.line(ML + H1 + H2 + H3, yy, ML + H1 + H2 + H3, yy + altura);
+
+            // Tarja vermelha na linha desta folha: quem tem três revisões na
+            // mão precisa saber, sem procurar, qual delas está lendo.
+            if (h.atual) { setF(VERMELHO); pdf.rect(ML, yy, 1.8, altura, 'F'); }
+
+            fonte(h.atual ? 'bold' : 'normal', 9); setC(TINTA);
+            pdf.text('Rev. ' + h.revisao, ML + 4.4, yy + 5.9);
+            // Data E hora: duas revisões no mesmo dia são comuns quando o
+            // laudo volta da conferência, e só a data não as ordena.
+            pdf.text(h.concluido ? Util.fmtDT(h.emitidoEm) : 'em elaboração',
+              ML + H1 + 3.2, yy + 5.9);
+
+            fonte('normal', 9); setC(TINTA);
+            pdf.text(inspetor, ML + H1 + H2 + 3.2, yy + 5.9);
+            pdf.text(motivo, ML + H1 + H2 + H3 + 3.2, yy + 5.9);
+          }
+        });
+      });
+
+      imprimirTabela('Histórico de revisões — ' + (d.numeroBase || d.numero), linhas);
     }
 
     /* Rodapé em todas as páginas: o total só é conhecido agora. */
