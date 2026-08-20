@@ -1,0 +1,84 @@
+/* ==========================================================================
+   base.css — reset, tokens e estrutura de página
+   Design system da Perpec, extraído do KIT-INICIAL.md.
+   NÃO invente cores fora dos tokens: o padrão visual depende disso.
+   ========================================================================== */
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --red:#C0392B;--red2:#961c13;--dark:#1A1210;
+  --bg:#F2F1ED;--surface:#FFFFFF;--surface2:#F8F7F5;
+  --border:#E0DBD5;--border2:#C5BDB5;
+  --text:#18171A;--muted:#6A6760;
+  --accent:#C0392B;--accent-lt:#FDF0EF;
+  --radius:8px;--radius-lg:12px;
+  --green:#2E7D32;--green-bg:#EAF6EB;--green-bd:#A7D7AA;
+  --yellow:#B7791F;--yellow-bg:#FEF7E6;--yellow-bd:#F0D98A;
+  --blue:#3D5AC0;--blue-bg:#EEF2FF;--blue-bd:#B9C5EC;
+
+  /* SEMÁFORO — uma cor, um significado, em TODA a aplicação.
+     in   = rascunho, em elaboração
+     warn = atenção / resposta que exige justificativa
+     late = não conforme, crítico
+     out  = concluído, aprovado                                   */
+  --st-in:#3D5AC0;   --st-in-bg:#EEF2FF;   --st-in-bd:#B9C5EC;
+  --st-warn:#B7791F; --st-warn-bg:#FEF7E6; --st-warn-bd:#F0D98A;
+  --st-late:#C0392B; --st-late-bg:#FDECEA; --st-late-bd:#E8B8B0;
+  --st-out:#2E7D32;  --st-out-bg:#EAF6EB;  --st-out-bd:#A7D7AA;
+}
+
+body{
+  font-family:"Segoe UI",system-ui,sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;-webkit-font-smoothing:antialiased;
+}
+
+/* ---------- Cabeçalho e faixa do documento ---------- */
+.site-header{background:#fff;border-bottom:3px solid var(--red);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.header-inner{max-width:1080px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;
+              gap:12px;padding:.7rem 1.5rem}
+.header-logo img{height:44px;width:auto;display:block}
+.header-right{text-align:right;margin-left:auto}
+.header-right .title{font-size:15px;font-weight:700;color:var(--dark)}
+.header-right .sub{font-size:11px;color:var(--muted);margin-top:2px}
+
+.doc-strip{background:var(--dark);padding:.55rem 1.5rem}
+.doc-strip-inner{max-width:1080px;margin:0 auto;display:flex;align-items:center;
+                 justify-content:space-between;flex-wrap:wrap;gap:.4rem}
+.doc-code-label{font-size:11px;color:#A09090;letter-spacing:.05em;text-transform:uppercase;margin-right:4px}
+.doc-code-val{font-family:"Courier New",monospace;font-size:14px;font-weight:700;color:#fff;letter-spacing:.1em}
+.doc-meta{font-size:12px;color:#D8CCCC;font-family:"Courier New",monospace;font-weight:700}
+
+/* Faixa de estado do sistema: quem está logado, o que está pendente.
+   Regra de UX nº 10 do kit — o estado nunca fica invisível. */
+.user-strip{background:var(--surface2);border-bottom:1px solid var(--border);padding:.45rem 1.5rem}
+.user-strip-inner{max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:10px;
+                  flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+.user-strip strong{color:var(--text);font-weight:700}
+.user-strip .sep{color:var(--border2)}
+.user-strip .right{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.user-strip a{color:var(--red);font-weight:700;text-decoration:none}
+.user-strip a:hover{text-decoration:underline}
+
+.sticky-top{position:sticky;top:0;z-index:100}
+.wrap{max-width:1080px;margin:0 auto;padding:1.5rem 1rem 5rem}
+
+.page-footer{text-align:center;font-size:11.5px;color:var(--muted);margin-top:2.4rem;
+             padding-top:1.1rem;border-top:1px solid var(--border)}
+
+/* ---------- Grades ---------- */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.full{grid-column:1/-1}
+@media(max-width:700px){
+  .g2,.g3{grid-template-columns:1fr}
+  .full{grid-column:1}
+  .header-inner,.doc-strip,.user-strip{padding-left:1rem;padding-right:1rem}
+  .header-logo img{height:34px}
+}
+
+/* ---------- Utilitários ---------- */
+.hide{display:none!important}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+.mono{font-family:"Courier New",monospace;font-weight:700;letter-spacing:.06em}

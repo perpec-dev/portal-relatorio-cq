@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Meu perfil — Perpec Oilfield Supply</title>
+
+<link rel="stylesheet" href="css/base.css"/>
+<link rel="stylesheet" href="css/componentes.css"/>
+<link rel="stylesheet" href="css/form.css"/>
+<link rel="stylesheet" href="css/admin.css"/>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="js/logo.js"></script>
+<script src="js/config.js"></script>
+<script src="js/core/util.js"></script>
+<script src="js/core/ui.js"></script>
+<script src="js/core/supabase-client.js"></script>
+<script src="js/core/auth.js"></script>
+<script src="js/core/db.js"></script>
+<script src="js/core/storage.js"></script>
+<script src="js/core/guards.js"></script>
+</head>
+<body>
+
+<div class="sticky-top" id="topo"></div>
+
+<main class="wrap">
+
+  <section class="card">
+    <div class="card-head"><span class="step">1</span><h2>MEUS DADOS</h2></div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="field col-inteira" id="wNome">
+          <label for="fNome">Nome completo<span class="req">*</span></label>
+          <input type="text" id="fNome" autocomplete="name"/>
+          <div class="hint">É este nome que sai assinando o laudo.</div>
+          <div class="msg" id="mNome"></div>
+        </div>
+        <div class="field col-meia" id="wMatricula">
+          <label for="fMatricula">Matrícula</label>
+          <input type="text" id="fMatricula" class="cod"/>
+          <div class="msg" id="mMatricula"></div>
+        </div>
+        <div class="field col-meia" id="wTelefone">
+          <label for="fTelefone">Telefone</label>
+          <input type="tel" id="fTelefone" inputmode="tel"/>
+          <div class="msg" id="mTelefone"></div>
+        </div>
+        <div class="field col-meia" id="wEmailRO">
+          <label for="fEmailRO">E-mail de acesso</label>
+          <input type="text" id="fEmailRO" readonly/>
+          <div class="hint">Só o administrador altera o e-mail de acesso.</div>
+        </div>
+      </div>
+      <div class="act-group" style="margin-top:16px">
+        <button type="button" class="btn btn-red" id="btSalvarDados">Salvar meus dados</button>
+        <button type="button" class="btn btn-outline" id="btTrocarSenha">Trocar minha senha</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><span class="step">2</span><h2>ASSINATURA / CARIMBO</h2></div>
+    <div class="card-body">
+      <div class="warn-box i">
+        Sua assinatura fica em <strong>armazenamento privado</strong>. Ela é exibida a
+        outro inspetor apenas dentro de um laudo que você já emitiu, e todo acesso desse
+        tipo fica registrado.
+      </div>
+
+      <div id="assinAtual"></div>
+
+      <div class="assin-abas">
+        <button type="button" class="opt sel" data-modo="desenhar">Desenhar agora</button>
+        <button type="button" class="opt" data-modo="imagem">Enviar imagem do carimbo</button>
+      </div>
+
+      <div id="modoDesenhar">
+        <div class="assin-box" id="assinBox">
+          <canvas id="assinCanvas"></canvas>
+          <div class="ph">Assine aqui com o dedo ou o mouse</div>
+        </div>
+        <div class="act-group" style="margin-top:12px">
+          <button type="button" class="btn btn-outline btn-sm" id="btLimparAssin">Limpar</button>
+          <button type="button" class="btn btn-red" id="btSalvarAssin">Salvar assinatura</button>
+        </div>
+      </div>
+
+      <div id="modoImagem" class="hide">
+        <div class="field">
+          <label for="fArquivoAssin">Imagem do carimbo ou assinatura</label>
+          <input type="file" id="fArquivoAssin" accept="image/png,image/jpeg,image/webp"/>
+          <div class="hint">PNG com fundo transparente fica melhor no documento. Até 2 MB.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><span class="step">3</span><h2>MEUS DADOS PESSOAIS (LGPD)</h2></div>
+    <div class="card-body">
+      <p class="card-ajuda">
+        Você pode consultar, exportar e pedir a exclusão dos seus dados a qualquer momento.
+      </p>
+      <div id="avisoExclusao"></div>
+      <div class="act-group">
+        <button type="button" class="btn btn-outline" id="btExportar">Exportar meus dados</button>
+        <button type="button" class="btn btn-outline" id="btExcluir">Solicitar exclusão</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="page-footer">Perpec Oilfield Supply — Meu perfil</div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/paginas/perfil.js"></script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Portal de Relatórios de Inspeção — Perpec Oilfield Supply</title>
+
+<link rel="stylesheet" href="css/base.css"/>
+<link rel="stylesheet" href="css/componentes.css"/>
+<link rel="stylesheet" href="css/portal.css"/>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="js/logo.js"></script>
+<script src="js/config.js"></script>
+<script src="js/core/util.js"></script>
+<script src="js/core/ui.js"></script>
+<script src="js/core/supabase-client.js"></script>
+<script src="js/core/auth.js"></script>
+<script src="js/core/db.js"></script>
+<script src="js/core/guards.js"></script>
+</head>
+<body>
+
+<!-- Regra de ouro do gate: começa VISÍVEL, sem hidden.
+     Nenhum dado pode piscar na tela antes da sessão confirmada. -->
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <div class="gate-top">
+      <img id="gateLogo" alt="Perpec Oilfield Supply"/>
+      <h1>Portal de Relatórios de Inspeção</h1>
+      <p>Acesso restrito aos inspetores cadastrados.</p>
+    </div>
+    <form class="gate-body" id="formEntrar" autocomplete="on">
+      <div class="warn-box e hide" id="gateErro"></div>
+
+      <div class="field" id="wEmail">
+        <label for="fEmail">E-mail</label>
+        <input type="email" id="fEmail" name="email" autocomplete="username"
+               inputmode="email" spellcheck="false" required/>
+        <div class="msg" id="mEmail"></div>
+      </div>
+
+      <div class="field" id="wSenha">
+        <label for="fSenha">Senha</label>
+        <input type="password" id="fSenha" name="password"
+               autocomplete="current-password" required/>
+        <div class="msg" id="mSenha"></div>
+      </div>
+
+      <button type="submit" class="btn btn-red btn-xl" id="btEntrar">ENTRAR</button>
+
+      <p style="font-size:12.5px;color:var(--muted);line-height:1.55;text-align:center">
+        Não tem acesso? O cadastro de inspetores é feito pelo administrador.
+      </p>
+    </form>
+  </div>
+</div>
+
+<div class="sticky-top" id="topo"></div>
+
+<main class="wrap">
+  <div class="portal-intro">
+    <h1>Qual relatório você vai preencher?</h1>
+    <p>Escolha o formulário. Você pode parar no meio: o rascunho fica salvo.</p>
+  </div>
+
+  <div id="grade" class="grade-relatorios"></div>
+
+  <div class="page-footer">
+    Perpec Oilfield Supply — Portal de Relatórios de Inspeção
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/paginas/portal.js"></script>
+</body>
+</html>

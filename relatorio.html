@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Relatório de Inspeção — Perpec Oilfield Supply</title>
+
+<link rel="stylesheet" href="css/base.css"/>
+<link rel="stylesheet" href="css/componentes.css"/>
+<link rel="stylesheet" href="css/form.css"/>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="js/logo.js"></script>
+<script src="js/config.js"></script>
+<script src="js/core/util.js"></script>
+<script src="js/core/ui.js"></script>
+<script src="js/core/supabase-client.js"></script>
+<script src="js/core/auth.js"></script>
+<script src="js/core/db.js"></script>
+<script src="js/core/storage.js"></script>
+<script src="js/core/guards.js"></script>
+<script src="js/core/documento.js"></script>
+<script src="js/render/campo-foto.js"></script>
+<script src="js/render/render-form.js"></script>
+<script src="js/render/validate.js"></script>
+<script src="js/pdf/gerar-pdf.js"></script>
+<script src="js/docx/gerar-docx.js"></script>
+</head>
+<body>
+
+<div class="sticky-top" id="topo"></div>
+
+<main class="wrap">
+  <div id="aviso"></div>
+
+  <div id="formulario">
+    <div class="carregando"><span class="spin"></span>Carregando formulário…</div>
+  </div>
+
+  <!-- Encerramento: laudo, observações e conclusão. Montado por script
+       porque os rótulos e as opções vêm do JSON do formulário. -->
+  <section class="card hide" id="cardLaudo">
+    <div class="card-head">
+      <span class="step" id="passoLaudo">•</span>
+      <h2 id="tituloLaudo">LAUDO</h2>
+    </div>
+    <div class="card-body">
+      <div class="laudo-opcoes" id="laudoOpcoes"></div>
+      <div class="msg" id="m__laudo" style="display:block;margin-bottom:10px"></div>
+      <div class="form-grid" id="laudoCampos"></div>
+    </div>
+  </section>
+
+  <div class="act-bar hide" id="barraAcoes">
+    <div class="rascunho-estado" id="estadoRascunho">
+      <span class="dot"></span><span class="txt">Rascunho novo</span>
+    </div>
+    <div class="act-group" id="acoes"></div>
+  </div>
+
+  <div class="page-footer">
+    Perpec Oilfield Supply — <span id="ftDoc"></span>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/paginas/relatorio.js"></script>
+</body>
+</html>

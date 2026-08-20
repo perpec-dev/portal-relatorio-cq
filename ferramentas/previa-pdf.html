@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Prévia do PDF — Perpec</title>
+
+<!--
+  FERRAMENTA DE DESENVOLVIMENTO. Não faz parte do portal e não toca no banco.
+
+  Abre o gerador de PDF de verdade (js/pdf/gerar-pdf.js) com um relatório de
+  mentira, para conferir tipografia, checklist e quebra de página sem precisar
+  de sessão, Supabase ou um laudo emitido. Use o Live Server e abra este
+  arquivo; qualquer mudança no gerador aparece com um F5.
+-->
+
+<style>
+  :root { color-scheme: light dark; }
+  body { margin: 0; font: 14px/1.5 system-ui, sans-serif;
+         background: #14110f; color: #f2ede8; }
+  header { display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+           padding: 12px 16px; background: #1f1a17; border-bottom: 3px solid #c1272d; }
+  h1 { font-size: 15px; margin: 0 auto 0 0; letter-spacing: .04em; text-transform: uppercase; }
+  button, label { font: inherit; }
+  button { background: #c1272d; color: #fff; border: 0; padding: 8px 16px;
+           border-radius: 4px; cursor: pointer; }
+  button.alt { background: transparent; border: 1px solid #6b625c; color: #f2ede8; }
+  label { display: flex; gap: 6px; align-items: center; color: #cdc4bd; }
+  iframe { width: 100%; height: calc(100vh - 58px); border: 0; background: #2a2522; }
+  #erro { padding: 16px; color: #ff9b9b; white-space: pre-wrap; font-family: ui-monospace, monospace; }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="../js/logo.js"></script>
+<script src="../js/config.js"></script>
+<script src="../js/core/util.js"></script>
+</head>
+<body>
+
+<header>
+  <h1>Prévia do PDF</h1>
+  <label><input type="checkbox" id="fRascunho"> rascunho</label>
+  <label><input type="checkbox" id="fLongo"> texto longo (força 3ª página)</label>
+  <label>laudo
+    <select id="fLaudo">
+      <option value="nao_conforme">NÃO CONFORME</option>
+      <option value="aprovado">APROVADO</option>
+    </select>
+  </label>
+  <button class="alt" id="btBaixar">Baixar</button>
+  <button id="btGerar">Gerar</button>
+</header>
+
+<iframe id="visor" title="PDF gerado"></iframe>
+<div id="erro"></div>
+
+<script>
+/* A prévia mora em /ferramentas; o gerador procura a fonte a partir da raiz. */
+CONFIG.PASTA_PDF = '../js/pdf/';
+
+/* Dublês do que o gerador consome. Só precisam responder o mesmo formato. */
+window.UI = { toast: function (m) { console.log('[toast]', m); } };
+
+let baixarDeVerdade = false;
+const baixarOriginal = Util.baixarBlob;
+Util.baixarBlob = function (nome, blob) {
+  document.getElementById('erro').textContent = 'arquivo: ' + nome;
+  if (baixarDeVerdade) { baixarOriginal(nome, blob); return; }
+  document.getElementById('visor').src = URL.createObjectURL(blob);
+};
+
+/* Imagem de teste desenhada na hora — nada de arquivo externo. */
+function fotoFalsa(largura, altura, texto, png) {
+  const c = document.createElement('canvas');
+  c.width = largura; c.height = altura;
+  const g = c.getContext('2d');
+  if (!png) {
+    g.fillStyle = '#8d9aa5'; g.fillRect(0, 0, largura, altura);
+    g.fillStyle = '#5b6873';
+    for (let i = 0; i < largura + altura; i += 40) { g.fillRect(i - altura, 0, 12, altura); }
+  }
+  g.fillStyle = png ? '#1f3fa8' : '#fff';
+  g.font = (png ? 'italic 64px cursive' : 'bold 34px sans-serif');
+  g.textAlign = 'center';
+  g.fillText(texto, largura / 2, altura / 2 + 12);
+  // A assinatura é PNG no portal (fundo transparente); as fotos são JPEG.
+  return {
+    dataUrl: png ? c.toDataURL('image/png') : c.toDataURL('image/jpeg', 0.8),
+    largura: largura, altura: altura
+  };
+}
+
+const PERGUNTAS = [
+  ['Usinagem conforme desenho?', 'SIM', 'NÃO', ''],
+  ['Danos causados por entrada de ferramenta?', 'NÃO', 'SIM', ''],
+  ['Posicionamento dos furações conforme desenho?', 'SIM', 'NÃO', ''],
+  ['Posicionamento dos pórticos conforme desenho?', 'SIM', 'NÃO', ''],
+  ['Usinagem das roscas conforme desenho?', 'SIM', 'NÃO', ''],
+  ['Roscas apresentam avarias nos filetes?', 'SIM', 'SIM',
+   'Rosca com vibração em três filetes na extremidade caixa.'],
+  ['Acabamento superficial conforme desenho?', 'SIM', 'NÃO', ''],
+  ['Todos os detalhes foram usinados conforme desenho?', 'SIM', 'NÃO', ''],
+  ['Todas as notas do desenho foram atendidas?', 'SIM', 'NÃO', ''],
+  ['Peças apresentam descontinuidades?', 'NÃO', 'SIM', ''],
+  ['Peças apresentam oxidações?', 'NÃO', 'SIM', ''],
+  ['Revestimento superficial apresenta avarias?', 'NÃO', 'SIM', '']
+];
+
+function pergunta(label, resposta, alertaSe, obs) {
+  return {
+    label: label, resposta: resposta, observacao: obs,
+    alerta: resposta === alertaSe,
+    opcoes: ['SIM', 'NÃO', 'N/A'].map(function (op) {
+      return { rotulo: op, marcada: resposta === op, alerta: op === alertaSe };
+    })
+  };
+}
+
+function documentoFalso() {
+  const rascunho = document.getElementById('fRascunho').checked;
+  const longo = document.getElementById('fLongo').checked;
+  const laudo = document.getElementById('fLaudo').value;
+
+  const perguntas = PERGUNTAS.map(function (p) { return pergunta(p[0], p[1], p[2], p[3]); });
+  if (longo) {
+    for (let i = 0; i < 14; i++) {
+      perguntas.push(pergunta(
+        'Pergunta de enchimento nº ' + (i + 1) + ' para empurrar a tabela para a folha seguinte?',
+        i % 3 === 0 ? 'NÃO' : 'SIM', 'NÃO',
+        i % 3 === 0 ? 'Observação de achado com texto suficientemente comprido para ocupar duas ou três linhas na coluna da direita.' : ''));
+    }
+  }
+
+  return {
+    titulo: 'Relatório de Inspeção Visual',
+    sigla: 'RIV',
+    docRef: 'FP-CQP-0011',
+    docRevisao: '01',
+    schemaVersao: '1.0.0',
+    numero: rascunho ? '(rascunho)' : 'RIV-001-26',
+    status: rascunho ? 'rascunho' : 'concluido',
+    revisao: longo ? 1 : 0,
+    motivoRevisao: 'Correção da rastreabilidade informada na emissão anterior.',
+    laudo: laudo,
+    laudoRotulo: laudo === 'aprovado' ? 'APROVADO' : 'NÃO CONFORME',
+    tituloLaudo: 'Laudo',
+    inspetorNome: 'João Victor Amaral',
+    dataInspecao: '2026-08-20',
+    rotuloData: 'Data da inspeção',
+    observacoes: 'Material identificado e segregado. Peças devolvidas ao fornecedor para reusinagem da rosca conforme tratativa registrada no RNC-014-26.',
+    rotuloObs: 'OBS',
+    secoes: [
+      {
+        titulo: 'Identificação',
+        linhas: [
+          ['Relatório nº', rascunho ? '—' : 'RIV-001-26'],
+          ['Descrição', 'Luva 4.1/2" IF — API 5CT, aço 4140 tratado'],
+          ['Quantidade', '2'],
+          ['RIR', 'RIR-032-26'],
+          ['Rastreabilidade', 'Corrida 8842-C / Colada 771902'],
+          ['Desenho nº', 'PPC-DES-1194'],
+          ['Revisão do desenho', 'C']
+        ],
+        perguntas: []
+      },
+      { titulo: 'Visual', linhas: [], perguntas: perguntas },
+      {
+        titulo: 'Registros obrigatórios do processo de inspeção',
+        linhas: [
+          ['QMP', 'QMP-2'],
+          ['Relatório nº — Visual', 'RIV-001-26'],
+          ['Relatório nº — Dimensional', 'RID-004-26'],
+          ['Relatório nº — END Superficial', 'RLP-002-26']
+        ],
+        perguntas: [
+          pergunta('Visual', 'SIM', null, ''),
+          pergunta('Dimensional', 'SIM', null, ''),
+          pergunta('END Superficial', 'SIM', null, ''),
+          pergunta('Dureza', 'N/A', null, '')
+        ]
+      }
+    ],
+    fotos: [
+      Object.assign(fotoFalsa(1200, 900, 'FOTO 1'), { legenda: 'pós fosfatização' }),
+      Object.assign(fotoFalsa(900, 1200, 'FOTO 2'), { legenda: 'detalhe da rosca com vibração' }),
+      Object.assign(fotoFalsa(1600, 700, 'FOTO 3'), { legenda: '' })
+    ],
+    assinatura: fotoFalsa(600, 200, 'J. V. Amaral', true)
+  };
+}
+
+/* O gerador chama Documento.montar/nomeArquivo — aqui eles devolvem o dublê. */
+window.Documento = {
+  montar: function () { return Promise.resolve(documentoFalso()); },
+  nomeArquivo: function (d, ext) { return 'PREVIA ' + d.numero + '.' + ext; },
+  ROTULO_LAUDO: { aprovado: 'APROVADO', nao_conforme: 'NÃO CONFORME' }
+};
+</script>
+
+<script src="../js/pdf/gerar-pdf.js"></script>
+<script>
+async function gerar() {
+  const erro = document.getElementById('erro');
+  erro.textContent = 'gerando…';
+  try {
+    await GerarPDF.gerar({}, {});
+  } catch (e) {
+    erro.textContent = (e && e.stack) || String(e);
+    console.error(e);
+  }
+}
+document.getElementById('btGerar').onclick = function () { baixarDeVerdade = false; gerar(); };
+document.getElementById('btBaixar').onclick = function () { baixarDeVerdade = true; gerar(); };
+gerar();
+</script>
+
+</body>
+</html>

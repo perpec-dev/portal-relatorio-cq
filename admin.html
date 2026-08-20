@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Inspetores — Perpec Oilfield Supply</title>
+
+<link rel="stylesheet" href="css/base.css"/>
+<link rel="stylesheet" href="css/componentes.css"/>
+<link rel="stylesheet" href="css/form.css"/>
+<link rel="stylesheet" href="css/admin.css"/>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="js/logo.js"></script>
+<script src="js/config.js"></script>
+<script src="js/core/util.js"></script>
+<script src="js/core/ui.js"></script>
+<script src="js/core/supabase-client.js"></script>
+<script src="js/core/auth.js"></script>
+<script src="js/core/db.js"></script>
+<script src="js/core/storage.js"></script>
+<script src="js/core/guards.js"></script>
+</head>
+<body>
+
+<div class="sticky-top" id="topo">
+  <nav class="tabs"><div class="tabs-inner">
+    <button class="tab sel" data-pane="inspetores">Inspetores
+      <span class="n zero" id="nInspetores">0</span></button>
+    <button class="tab" data-pane="auditoria">Auditoria</button>
+  </div></nav>
+</div>
+
+<main class="wrap">
+
+  <section class="pane on" id="pane-inspetores">
+    <div class="painel">
+      <div class="painel-num"><div class="n" id="numTotal">0</div><div class="k">Cadastrados</div></div>
+      <div class="painel-num out"><div class="n" id="numAtivos">0</div><div class="k">Ativos</div></div>
+      <div class="painel-num late"><div class="n" id="numSemAssin">0</div><div class="k">Sem assinatura</div></div>
+      <div class="painel-num late"><div class="n" id="numExclusao">0</div><div class="k">Pedido de exclusão</div></div>
+    </div>
+
+    <div class="act-bar" style="margin-bottom:1.1rem">
+      <div style="font-size:13px;color:var(--muted)">
+        O cadastro cria o acesso e o perfil de uma vez.
+      </div>
+      <div class="act-group">
+        <button type="button" class="btn btn-red" id="btNovo">CADASTRAR INSPETOR</button>
+      </div>
+    </div>
+
+    <div id="listaInspetores"></div>
+  </section>
+
+  <section class="pane" id="pane-auditoria">
+    <div class="warn-box i">
+      Registro das operações de tratamento de dados (LGPD, art. 37). Não é possível
+      alterar nem apagar estas linhas pela aplicação.
+    </div>
+    <div id="listaAuditoria"></div>
+  </section>
+
+  <div class="page-footer">Perpec Oilfield Supply — Administração</div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/paginas/admin.js"></script>
+</body>
+</html>

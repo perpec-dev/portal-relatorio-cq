@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Relatórios — Perpec Oilfield Supply</title>
+
+<link rel="stylesheet" href="css/base.css"/>
+<link rel="stylesheet" href="css/componentes.css"/>
+<link rel="stylesheet" href="css/form.css"/>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="js/logo.js"></script>
+<script src="js/config.js"></script>
+<script src="js/core/util.js"></script>
+<script src="js/core/ui.js"></script>
+<script src="js/core/supabase-client.js"></script>
+<script src="js/core/auth.js"></script>
+<script src="js/core/db.js"></script>
+<script src="js/core/storage.js"></script>
+<script src="js/core/guards.js"></script>
+<script src="js/core/documento.js"></script>
+<script src="js/render/campo-foto.js"></script>
+<script src="js/render/render-form.js"></script>
+<script src="js/pdf/gerar-pdf.js"></script>
+<script src="js/docx/gerar-docx.js"></script>
+<script src="js/xlsx/planilha.js"></script>
+<script src="js/xlsx/exportar.js"></script>
+</head>
+<body>
+
+<div class="sticky-top" id="topo">
+  <nav class="tabs"><div class="tabs-inner" id="abas"></div></nav>
+</div>
+
+<main class="wrap">
+  <div class="legenda">
+    <span><i style="background:var(--st-in)"></i> Rascunho</span>
+    <span><i style="background:var(--st-out)"></i> Aprovado</span>
+    <span><i style="background:var(--st-late)"></i> Não conforme</span>
+  </div>
+
+  <div class="card">
+    <div class="card-body" style="padding-top:1rem;padding-bottom:1rem">
+      <div class="form-grid">
+        <div class="field col-meia" id="wBusca">
+          <label for="fBusca">Procurar</label>
+          <input type="text" id="fBusca" placeholder="Número, descrição, rastreabilidade…"/>
+        </div>
+        <div class="field col-terco" id="wTipo">
+          <label for="fTipo">Formulário</label>
+          <select id="fTipo"><option value="">Todos</option></select>
+        </div>
+        <div class="field col-terco" id="wLaudo">
+          <label for="fLaudo">Laudo</label>
+          <select id="fLaudo">
+            <option value="">Todos</option>
+            <option value="aprovado">Aprovado</option>
+            <option value="nao_conforme">Não conforme</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="barra-exportar">
+        <div class="hint">Backup do acervo em Excel: uma linha por relatório, uma
+          aba por formulário. Respeita os filtros de <em>Procurar</em> e
+          <em>Formulário</em> acima — o filtro de laudo e a aba selecionada não,
+          porque backup não se corta pela metade.</div>
+        <button type="button" class="btn btn-outline btn-sm" id="btExportar">
+          Exportar Excel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="lista"></div>
+
+  <div class="page-footer">Perpec Oilfield Supply — Relatórios de Inspeção</div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/paginas/meus-relatorios.js"></script>
+</body>
+</html>

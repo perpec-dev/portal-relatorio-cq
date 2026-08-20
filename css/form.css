@@ -1,0 +1,112 @@
+/* ==========================================================================
+   form.css — formulário montado a partir do schema, fotos e laudo
+   ========================================================================== */
+
+.form-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:15px}
+.col-inteira{grid-column:span 6}
+.col-meia   {grid-column:span 3}
+.col-terco  {grid-column:span 2}
+@media(max-width:760px){.col-meia,.col-terco{grid-column:span 6}}
+
+/* ---------- Pergunta de resposta fixa (SIM / NÃO / N/A) ---------- */
+/* Alvo grande: a regra é conseguir acertar de luva, em pé, na área.
+   Por isso são botões de 48px e não um <select>. */
+.pergunta{padding:13px 0;border-bottom:1px dashed var(--border)}
+.pergunta:last-child{border-bottom:none}
+.pergunta-topo{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.pergunta-txt{flex:1;min-width:210px;font-size:14.5px;font-weight:600;color:var(--text);line-height:1.45;
+              padding-top:9px}
+.pergunta.err .pergunta-txt{color:var(--red)}
+
+.opcoes{display:flex;gap:7px;flex-wrap:wrap}
+.opt{border:2px solid var(--border2);background:var(--surface);border-radius:var(--radius);
+     min-height:48px;padding:10px 15px;font-size:13.5px;font-weight:800;letter-spacing:.03em;
+     color:var(--muted);cursor:pointer;font-family:inherit;transition:all .13s;white-space:nowrap}
+.opt:hover{border-color:#9A9087;background:var(--surface2)}
+
+/* Escolhida e OK: verde. Escolhida e problemática: vermelha.
+   É o `alertaSe` do JSON que decide qual das duas — a cor não é enfeite,
+   ela diz ao inspetor o que vai ter que justificar. */
+.opt.sel{background:var(--st-out-bg);border-color:var(--st-out);color:var(--st-out)}
+.opt.sel.alerta{background:var(--st-late-bg);border-color:var(--st-late);color:var(--st-late)}
+.opt.sel.neutro{background:var(--st-in-bg);border-color:var(--st-in);color:var(--st-in)}
+
+.pergunta-obs{margin-top:11px}
+.pergunta-obs label{font-size:12px;font-weight:700;color:var(--st-late);
+                    text-transform:uppercase;letter-spacing:.05em}
+.pergunta-obs textarea{margin-top:5px;min-height:62px;border-color:var(--st-late-bd);
+                       background:var(--st-late-bg)}
+.pergunta-obs textarea:focus{background:var(--surface)}
+
+/* ---------- Fotos ---------- */
+.foto-acoes{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:12px}
+.foto-acoes input[type=file]{display:none}
+@media(max-width:600px){.foto-acoes .btn{flex:1}}
+
+/* Prévia da câmera no computador. Fundo escuro e object-fit:contain: a webcam
+   raramente tem a proporção da caixa, e cortar a imagem esconderia justamente
+   a borda da peça que o inspetor está tentando enquadrar. */
+.camera{position:relative;aspect-ratio:4/3;background:#12100f;overflow:hidden;
+        border-radius:var(--radius);display:flex;align-items:center;justify-content:center}
+.camera video{width:100%;height:100%;object-fit:contain;display:block}
+.camera-aviso{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+              color:#8b827b;font-size:13px;pointer-events:none}
+.camera-barra{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:11px}
+.camera-dica{font-size:12.5px;color:var(--muted)}
+
+.foto-grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:12px}
+.foto-item{border:1px solid var(--border);border-radius:var(--radius);background:var(--surface2);
+           overflow:hidden;display:flex;flex-direction:column;position:relative}
+.foto-item img{width:100%;height:132px;object-fit:cover;display:block;background:var(--border)}
+.foto-item .legenda-in{border:none;border-top:1px solid var(--border);border-radius:0;font-size:13px;
+                       padding:9px 10px;background:var(--surface)}
+.foto-item .legenda-in:focus{box-shadow:none;border-top-color:var(--red)}
+.foto-item .rm{position:absolute;top:7px;right:7px;width:30px;height:30px;border-radius:50%;border:none;
+               background:rgba(26,18,16,.78);color:#fff;font-size:17px;line-height:1;cursor:pointer;
+               font-family:inherit;display:flex;align-items:center;justify-content:center}
+.foto-item .rm:hover{background:var(--red)}
+.foto-item .n{position:absolute;top:7px;left:7px;background:rgba(26,18,16,.78);color:#fff;
+              font-size:11px;font-weight:800;border-radius:20px;padding:3px 9px;letter-spacing:.05em}
+
+/* Enviando: a foto aparece na hora, esmaecida, e firma quando o upload termina.
+   Sem isso o inspetor não sabe se a foto entrou e tira de novo. */
+.foto-item.enviando img{opacity:.42}
+.foto-item.enviando::after{content:"";position:absolute;top:calc(50% - 26px);left:calc(50% - 13px);
+                           width:26px;height:26px;border:3px solid rgba(255,255,255,.55);
+                           border-top-color:#fff;border-radius:50%;animation:girar .7s linear infinite}
+.foto-item.falhou{border-color:var(--st-late)}
+.foto-item.falhou img{opacity:.3}
+.foto-vazio{grid-column:1/-1}
+
+/* ---------- Laudo ---------- */
+.laudo-opcoes{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+@media(max-width:560px){.laudo-opcoes{grid-template-columns:1fr}}
+.laudo-op{border:2.5px solid var(--border2);background:var(--surface);border-radius:var(--radius-lg);
+          min-height:74px;padding:16px;font-size:16px;font-weight:800;letter-spacing:.04em;
+          color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s;
+          display:flex;align-items:center;justify-content:center;gap:11px}
+.laudo-op:hover{border-color:#9A9087}
+.laudo-op .mark{width:26px;height:26px;border-radius:50%;border:2.5px solid currentColor;flex-shrink:0;
+                display:flex;align-items:center;justify-content:center}
+.laudo-op .mark::after{content:"";width:12px;height:12px;border-radius:50%;background:currentColor;
+                       opacity:0;transition:opacity .15s}
+.laudo-op.sel .mark::after{opacity:1}
+.laudo-op.sel.verde   {border-color:var(--st-out); background:var(--st-out-bg); color:var(--st-out)}
+.laudo-op.sel.vermelho{border-color:var(--st-late);background:var(--st-late-bg);color:var(--st-late)}
+
+/* ---------- Barra de estado do rascunho ---------- */
+.rascunho-estado{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);
+                 font-weight:600}
+.rascunho-estado .dot{width:9px;height:9px;border-radius:50%;background:var(--border2);flex-shrink:0}
+.rascunho-estado.salvando .dot{background:var(--st-warn)}
+.rascunho-estado.salvo    .dot{background:var(--st-out)}
+.rascunho-estado.erro     .dot{background:var(--st-late)}
+.rascunho-estado.erro{color:var(--st-late);font-weight:700}
+
+/* ---------- Somente leitura (relatório concluído) ---------- */
+.form-lido .opt:not(.sel){display:none}
+.form-lido .opt{cursor:default;pointer-events:none}
+.form-lido input,.form-lido textarea,.form-lido select{
+  background:var(--surface2);border-style:dashed;color:var(--text);pointer-events:none}
+.form-lido .foto-item .rm{display:none}
+.form-lido .foto-acoes{display:none}

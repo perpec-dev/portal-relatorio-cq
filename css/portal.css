@@ -1,0 +1,36 @@
+/* ==========================================================================
+   portal.css — tela de escolha do relatório
+   ========================================================================== */
+
+.portal-intro{margin-bottom:1.4rem}
+.portal-intro h1{font-size:20px;font-weight:800;color:var(--dark);letter-spacing:-.01em}
+.portal-intro p{font-size:14px;color:var(--muted);margin-top:5px;line-height:1.5}
+
+.grade-relatorios{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:14px}
+
+.card-rel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+          box-shadow:0 1px 3px rgba(0,0,0,.05);overflow:hidden;display:flex;flex-direction:column;
+          text-align:left;font-family:inherit;padding:0;border-left:7px solid var(--red);
+          transition:box-shadow .14s,transform .14s}
+.card-rel.ativo{cursor:pointer}
+.card-rel.ativo:hover{box-shadow:0 8px 24px rgba(0,0,0,.13);transform:translateY(-2px)}
+
+/* Placeholder: cinza e sem sombra, porque não abre nada.
+   Continua na tela de propósito — o portal mostra o mapa completo do SGQ. */
+.card-rel.breve{border-left-color:var(--border2);background:var(--surface2);cursor:not-allowed}
+.card-rel.breve .card-rel-nome{color:var(--muted)}
+
+.card-rel-topo{display:flex;align-items:flex-start;gap:11px;padding:1.1rem 1.2rem .8rem}
+.card-rel-sigla{font-family:"Courier New",monospace;font-size:15px;font-weight:800;letter-spacing:.09em;
+                color:#fff;background:var(--dark);border-radius:6px;padding:5px 9px;flex-shrink:0}
+.card-rel.breve .card-rel-sigla{background:var(--border2);color:var(--surface)}
+.card-rel-nome{font-size:15px;font-weight:700;color:var(--dark);line-height:1.35;flex:1}
+
+.card-rel-pe{margin-top:auto;padding:.7rem 1.2rem;border-top:1px solid var(--border);
+             display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.card-rel-doc{font-family:"Courier New",monospace;font-size:11.5px;font-weight:700;
+              letter-spacing:.05em;color:var(--muted)}
+.card-rel-seta{font-size:19px;color:var(--red);line-height:1}
+.card-rel.breve .card-rel-seta{display:none}
+
+@media(max-width:520px){.grade-relatorios{grid-template-columns:1fr}}

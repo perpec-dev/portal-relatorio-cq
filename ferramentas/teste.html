@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Autoteste — Perpec</title>
+
+<!--
+  FERRAMENTA DE DESENVOLVIMENTO. Não faz parte do portal e não toca no banco.
+
+  Roda os geradores de PDF, DOCX e XLSX contra um relatório de mentira e
+  confere o resultado. Abra com o Live Server depois de mexer em documento.js,
+  gerar-pdf.js, gerar-docx.js, planilha.js ou exportar.js.
+
+  Existe por um motivo concreto: a fonte embarcada saiu uma vez com erro de
+  sintaxe e o PDF passou a cair calado para Helvetica. Ninguém percebeu olhando
+  a tela. O teste F2 pega exatamente isso.
+-->
+
+<style>
+  body { margin:0; font:13px/1.6 ui-monospace,Consolas,monospace; background:#14110f; color:#e8e2dc }
+  header { padding:12px 16px; background:#1f1a17; border-bottom:3px solid #c1272d;
+           font:600 14px/1 system-ui,sans-serif; letter-spacing:.06em; text-transform:uppercase }
+  pre { padding:16px; margin:0; white-space:pre-wrap; word-break:break-word }
+  .ok { color:#7ddc9a } .falhou { color:#ff8f8f; font-weight:700 }
+  #placar { padding:14px 16px; font:700 15px/1 system-ui,sans-serif; letter-spacing:.04em }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+<script src="../js/logo.js"></script>
+<script src="../js/config.js"></script>
+<script src="../js/core/util.js"></script>
+<script src="../js/core/ui.js"></script>
+</head>
+<body>
+<header>Autoteste dos geradores</header>
+<div id="placar">rodando…</div>
+<pre id="saida"></pre>
+
+<script>
+/* A ferramenta mora em /ferramentas; os geradores procuram a partir da raiz. */
+CONFIG.PASTA_PDF = '../js/pdf/';
+CONFIG.PASTA_FORMS = '../js/forms/';
+
+/* Dublês do que os geradores consomem — nada aqui fala com o Supabase. */
+window.CampoFoto = { montar: function () { return document.createElement('div'); },
+                     obter: function () { return []; } };
+window.Auth = { perfil: { id: 'p1', nome: 'João Victor Amaral', assinatura_path: null } };
+window.Storage = {
+  urlsFotos: async function () { return {}; },
+  comoDataURL: async function (u) { return u; },
+  dimensoes: async function () { return { largura: 600, altura: 200 }; }
+};
+window.DB = {
+  listarFotos: async function () { return []; },
+  registrarAcessoAssinatura: async function () {}
+};
+</script>
+
+<script src="../js/render/render-form.js"></script>
+<script src="../js/core/documento.js"></script>
+<script src="../js/pdf/gerar-pdf.js"></script>
+<script src="../js/docx/gerar-docx.js"></script>
+<script src="../js/xlsx/planilha.js"></script>
+<script src="../js/xlsx/exportar.js"></script>
+
+<script>
+const saida = document.getElementById('saida');
+let passou = 0, falhou = 0;
+
+function linha(texto, classe) {
+  const s = document.createElement('span');
+  s.className = classe || '';
+  s.textContent = texto + '\n';
+  saida.appendChild(s);
+}
+function conferir(nome, valor, esperado) {
+  const bate = String(valor) === String(esperado);
+  if (bate) { passou++; linha('  ok   ' + nome + ' = ' + valor, 'ok'); }
+  else { falhou++; linha('  FALHOU ' + nome + '\n         obtido:   ' + valor +
+                         '\n         esperado: ' + esperado, 'falhou'); }
+}
+function conferirQue(nome, condicao, detalhe) {
+  if (condicao) { passou++; linha('  ok   ' + nome + (detalhe ? ' — ' + detalhe : ''), 'ok'); }
+  else { falhou++; linha('  FALHOU ' + nome + (detalhe ? ' — ' + detalhe : ''), 'falhou'); }
+}
+
+let capturado = null;
+Util.baixarBlob = function (nome, blob) { capturado = { nome: nome, blob: blob }; };
+
+const RELATORIO = {
+  id: 'r1', tipo: 'inspecao-visual', schemaVersao: '1.0.0',
+  numero: 'RIV-007-26', revisao: 0, status: 'concluido', laudo: 'nao_conforme',
+  inspetorId: 'p1', inspetorNome: 'João Victor Amaral',
+  concluidoEm: '2026-08-20T14:30:00Z', atualizadoEm: '2026-08-20T14:31:00Z',
+  dados: {
+    descricao: 'Luva 4.1/2" IF — API 5CT', quantidade: '2', rir: 'RIR-032-26',
+    rastreabilidade: 'Corrida 8842-C', desenho_numero: 'PPC-DES-1194', desenho_rev: 'C',
+    usinagem_conforme_desenho: 'SIM', danos_entrada_ferramenta: 'NÃO',
+    posicionamento_furacoes: 'SIM', posicionamento_porticos: 'SIM',
+    usinagem_roscas: 'SIM', roscas_avarias_filetes: 'SIM',
+    roscas_avarias_filetes__obs: 'Rosca com vibração em três filetes.',
+    acabamento_superficial: 'SIM', detalhes_usinados: 'SIM',
+    notas_desenho_atendidas: 'SIM', pecas_descontinuidades: 'NÃO',
+    pecas_oxidacoes: 'NÃO', revestimento_avarias: 'NÃO',
+    qmp: 'QMP-2',
+    reg_visual: 'SIM', reg_visual_relatorio: 'RIV-007-26',
+    reg_dimensional: 'SIM', reg_dimensional_relatorio: 'RID-004-26',
+    reg_end_superficial: 'SIM', reg_end_superficial_relatorio: 'RLP-002-26',
+    reg_dureza: 'N/A',
+    data_inspecao: '2026-08-20',
+    observacoes: 'Material identificado e segregado.'
+  }
+};
+
+(async function () {
+  try {
+    /* ---------------- Fonte ---------------- */
+    linha('\nFONTE EMBARCADA');
+    await new Promise(function (ok) {
+      const s = document.createElement('script');
+      s.src = CONFIG.PASTA_PDF + 'fontes.js';
+      s.onload = ok; s.onerror = ok;
+      document.head.appendChild(s);
+    });
+    /* Se fontes.js tiver erro de sintaxe o onload dispara igual e o global
+       NÃO existe — foi assim que a Proxima sumiu do PDF sem ninguém notar. */
+    conferirQue('fontes.js define FONTES_PDF', !!window.FONTES_PDF,
+      window.FONTES_PDF ? window.FONTES_PDF.faces.length + ' faces' : 'ausente ou com erro de sintaxe');
+
+    const schema = await RenderForm.carregarSchema('inspecao-visual');
+    linha('\nDOCUMENTO (js/core/documento.js)');
+
+    const d = await Documento.montar(RELATORIO, schema);
+    const acha = function (bloco, re) {
+      return (bloco.linhas.filter(function (l) { return re.test(l[0]); })[0] || [])[1];
+    };
+    // O número mora em coluna própria; se ninguém o reinjetar, sai travessão.
+    conferir('nº na identificação', acha(d.secoes[0], /^Relat/), 'RIV-007-26');
+    conferir('descrição', acha(d.secoes[0], /^Descri/), 'Luva 4.1/2" IF — API 5CT');
+    conferir('seções', d.secoes.length, 3);
+
+    const p = d.secoes[1].perguntas[5];
+    conferir('checklist: nº de opções', p.opcoes.length, 3);
+    conferir('checklist: rótulo curto', p.opcoes[2].rotulo, 'N/A');
+    conferir('checklist: marcada', p.opcoes[0].marcada, true);
+    conferir('checklist: alerta', p.alerta, true);
+
+    linha('\nNOME DO ARQUIVO (sigla não pode duplicar)');
+    conferir('emitido', Documento.nomeArquivo(d, 'pdf'), 'RIV-007-26.pdf');
+    conferir('rascunho', Documento.nomeArquivo({ sigla: 'RIV', numero: '(rascunho)' }, 'pdf'),
+      'RIV RASCUNHO.pdf');
+    conferir('prefixo diferente', Documento.nomeArquivo({ sigla: 'RIV', numero: 'XX-001-26' }, 'docx'),
+      'RIV XX-001-26.docx');
+    conferir('revisão', Documento.nomeArquivo({ sigla: 'RIV', numero: 'RIV-007-26 Rev.1' }, 'pdf'),
+      'RIV-007-26 Rev.1.pdf');
+
+    linha('\nPDF');
+    capturado = null;
+    await GerarPDF.gerar(RELATORIO, schema);
+    conferir('nome do arquivo', capturado.nome, 'RIV-007-26.pdf');
+    // Sem a fonte embarcada o PDF encolhe ~15 KB: o tamanho denuncia a queda
+    // silenciosa para Helvetica.
+    conferirQue('tamanho com fonte embarcada', capturado.blob.size > 65000,
+      capturado.blob.size + ' bytes');
+    const urlPdf = URL.createObjectURL(capturado.blob);
+
+    linha('\nDOCX');
+    capturado = null;
+    await GerarDOCX.gerar(RELATORIO, schema);
+    conferir('nome do arquivo', capturado.nome, 'RIV-007-26.docx');
+    conferirQue('gerou conteúdo', capturado.blob.size > 10000, capturado.blob.size + ' bytes');
+
+    linha('\nPLANILHA');
+    const tipo = { codigo: 'inspecao-visual', nome: 'Relatório de Inspeção Visual', prefixo: 'RIV' };
+    const aba = Exportar.aba(tipo, [RELATORIO], schema);
+    conferir('1ª coluna', aba.colunas[0].titulo, 'Formulário');
+    conferir('nº do relatório', aba.linhas[0][1], 'RIV-007-26');
+    conferir('situação', aba.linhas[0][3], 'Não conforme');
+    const iEstat = aba.colunas.length - 5;
+    conferir('itens verificados', aba.linhas[0][iEstat], 16);
+    conferir('itens conformes', aba.linhas[0][iEstat + 1], 15);
+    conferir('itens não conformes', aba.linhas[0][iEstat + 2], 1);
+    conferirQue('achado descrito', /Rosca com vibra/.test(aba.linhas[0][iEstat + 3]));
+
+    capturado = null;
+    Planilha.baixar('teste', [aba]);
+    conferir('nome do arquivo', capturado.nome, 'teste.xlsx');
+    // Um .xlsx é um ZIP: tem que começar com "PK".
+    const cab = new Uint8Array(await capturado.blob.slice(0, 2).arrayBuffer());
+    conferir('assinatura ZIP', String.fromCharCode(cab[0], cab[1]), 'PK');
+    const urlXlsx = URL.createObjectURL(capturado.blob);
+
+    linha('');
+    const baixe = document.createElement('div');
+    baixe.innerHTML = '<a href="' + urlPdf + '" download="teste.pdf" ' +
+      'style="color:#ff8f8f">abrir o PDF gerado</a> &nbsp;·&nbsp; ' +
+      '<a href="' + urlXlsx + '" download="teste.xlsx" style="color:#ff8f8f">' +
+      'abrir a planilha gerada</a>';
+    saida.appendChild(baixe);
+  } catch (e) {
+    falhou++;
+    linha('\nEXPLODIU: ' + (e && e.stack ? e.stack : e), 'falhou');
+  }
+
+  const placar = document.getElementById('placar');
+  placar.textContent = falhou ? (falhou + ' FALHA(S), ' + passou + ' ok')
+                              : (passou + ' testes, tudo certo');
+  placar.style.color = falhou ? '#ff8f8f' : '#7ddc9a';
+  document.title = falhou ? 'FALHOU' : 'PRONTO';
+})();
+</script>
+</body>
+</html>

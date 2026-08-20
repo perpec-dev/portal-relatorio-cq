@@ -1,0 +1,350 @@
+{
+  "codigo": "inspecao-visual",
+  "nome": "Relatório de Inspeção Visual",
+  "sigla": "RIV",
+  "docRef": "FP-CQP-0011",
+  "docRevisao": "01",
+  "versao": "1.0.0",
+
+  "_nota": [
+    "Os textos das perguntas estão COPIADOS DO FORMULÁRIO CONTROLADO, letra por letra.",
+    "Não corrija a redação por aqui: FP-CQP-0011 é documento do SGQ, e mudar o texto",
+    "sem subir a revisão do formulário faz o laudo divergir do documento aprovado.",
+    "Se a redação precisa mudar, muda no formulário, sobe para Rev.02, e aí sim aqui."
+  ],
+
+  "secoes": [
+    {
+      "id": "identificacao",
+      "titulo": "Identificação",
+      "ativo": true,
+      "campos": [
+        {
+          "id": "numero",
+          "label": "Relatório nº",
+          "tipo": "texto",
+          "obrigatorio": true,
+          "ativo": true,
+          "largura": "meia",
+          "codigo": true,
+          "sistema": "numero",
+          "sugerir": true,
+          "ajuda": "Formato RIV-000-26. O sistema sugere o próximo livre; você pode trocar."
+        },
+        {
+          "id": "descricao",
+          "label": "Descrição",
+          "tipo": "texto",
+          "obrigatorio": true,
+          "ativo": true,
+          "largura": "inteira"
+        },
+        {
+          "id": "quantidade",
+          "label": "Quantidade",
+          "tipo": "numero",
+          "obrigatorio": true,
+          "ativo": true,
+          "largura": "terco",
+          "min": 1,
+          "casas": 0
+        },
+        {
+          "id": "rir",
+          "label": "RIR",
+          "tipo": "texto",
+          "obrigatorio": false,
+          "ativo": true,
+          "largura": "terco",
+          "codigo": true,
+          "ajuda": "Nº do Relatório de Inspeção de Recebimento, quando houver."
+        },
+        {
+          "id": "rastreabilidade",
+          "label": "Rastreabilidade",
+          "tipo": "texto",
+          "obrigatorio": true,
+          "ativo": true,
+          "largura": "terco",
+          "codigo": true,
+          "ajuda": "Colada, corrida ou nº de série que liga a peça ao material."
+        },
+        {
+          "id": "desenho_numero",
+          "label": "Desenho nº",
+          "tipo": "texto",
+          "obrigatorio": true,
+          "ativo": true,
+          "largura": "meia",
+          "codigo": true
+        },
+        {
+          "id": "desenho_rev",
+          "label": "Revisão do desenho",
+          "tipo": "texto",
+          "obrigatorio": true,
+          "ativo": true,
+          "largura": "meia",
+          "codigo": true,
+          "ajuda": "A REV. do desenho usado na inspeção — não a revisão deste relatório."
+        }
+      ]
+    },
+
+    {
+      "id": "visual",
+      "titulo": "Visual",
+      "ajuda": "Responda todas. Se a resposta indicar problema, o campo fica vermelho e pede a observação.",
+      "ativo": true,
+      "campos": [
+        {
+          "id": "usinagem_conforme_desenho",
+          "label": "Usinagem conforme desenho?",
+          "tipo": "sim_nao_na",
+          "obrigatorio": true,
+          "ativo": true,
+          "alertaSe": "NÃO",
+          "observacaoSeAlerta": true
+        },
+        {
+          "id": "danos_entrada_ferramenta",
+          "label": "Danos causados por entrada de ferramenta?",
+          "tipo": "sim_nao_na",
+          "obrigatorio": true,
+          "ativo": true,
+          "alertaSe": "SIM",
+          "observacaoSeAlerta": true
+        },
+        {
+          "id": "posicionamento_furacoes",
+          "label": "Posicionamento dos furações conforme desenho?",
+          "tipo": "sim_nao_na",
+          "obrigatorio": true,
+          "ativo": true,
+          "alertaSe": "NÃO",
+          "observacaoSeAlerta": true
+        },
+        {
+          "id": "posicionamento_porticos",
+          "label": "Posicionamento dos pórticos conforme desenho?",
+          "tipo": "sim_nao_na",
+          "obrigatorio": true,
+          "ativo": true,
+          "alertaSe": "NÃO",
+          "observacaoSeAlerta": true
+        },
+        {
+          "id": "usinagem_roscas",
+          "label": "Usinagem das roscas conforme desenho?",
+          "tipo": "sim_nao_na",
+          "obrigatorio": true,
+          "ativo": true,
+          "alertaSe": "NÃO",
+          "observacaoSeAlerta": true
+        },
+        {
+          "id": "roscas_avarias_filetes",
+          "label": "Roscas apresentam avarias nos filetes?",
+          "tipo": "sim_nao_na",
+          "obrigatorio": true,
+          "ativo": true,
+          "alertaSe": "SIM",
+          "observacaoSeAlerta": true
+        },
+        {
+          "id": "acabamento_superficial",
+          "label": "Acabamento superficial conforme desenho?",
+          "tipo": "sim_nao_na",
+          "obrigatorio": true,
+          "ativo": true,
+          "alertaSe": "NÃO",
+          "observacaoSeAlerta": true
+        },
+        {
+          "id": "detalhes_usinados",
+          "label": "Todos os detalhes foram usinados conforme desenho?",
+          "tipo": "sim_nao_na",
+          "obrigatorio": true,
+          "ativo": true,
+          "alertaSe": "NÃO",
+          "observacaoSeAlerta": true
+        },
+        {
+          "id": "notas_desenho_atendidas",
+          "label": "Todas as notas do desenho foram atendidas?",
+          "tipo": "sim_nao_na",
+          "obrigatorio": true,
+          "ativo": true,
+          "alertaSe": "NÃO",
+          "observacaoSeAlerta": true
+        },
+        {
+          "id": "pecas_descontinuidades",
+          "label": "Peças apresentam descontinuidades?",
+          "tipo": "sim_nao_na",
+          "obrigatorio": true,
+          "ativo": true,
+          "alertaSe": "SIM",
+          "observacaoSeAlerta": true
+        },
+        {
+          "id": "pecas_oxidacoes",
+          "label": "Peças apresentam oxidações?",
+          "tipo": "sim_nao_na",
+          "obrigatorio": true,
+          "ativo": true,
+          "alertaSe": "SIM",
+          "observacaoSeAlerta": true
+        },
+        {
+          "id": "revestimento_avarias",
+          "label": "Revestimento superficial apresenta avarias?",
+          "tipo": "sim_nao_na",
+          "obrigatorio": true,
+          "ativo": true,
+          "alertaSe": "SIM",
+          "observacaoSeAlerta": true
+        }
+      ]
+    },
+
+    {
+      "id": "registros_obrigatorios",
+      "titulo": "Registros obrigatórios do processo de inspeção",
+      "ativo": true,
+      "campos": [
+        {
+          "id": "qmp",
+          "label": "QMP",
+          "tipo": "opcao_unica",
+          "obrigatorio": true,
+          "ativo": true,
+          "largura": "inteira",
+          "opcoes": ["QMP-0", "QMP-1", "QMP-2", "QMP-3"],
+          "ajuda": "Nível do plano de qualidade aplicável ao item."
+        },
+
+        {
+          "id": "reg_visual",
+          "label": "Visual",
+          "tipo": "sim_na",
+          "obrigatorio": true,
+          "ativo": true,
+          "largura": "meia"
+        },
+        {
+          "id": "reg_visual_relatorio",
+          "label": "Relatório nº — Visual",
+          "tipo": "texto",
+          "obrigatorio": true,
+          "ativo": true,
+          "largura": "meia",
+          "codigo": true,
+          "exibirSe": { "campo": "reg_visual", "igual": "SIM" }
+        },
+
+        {
+          "id": "reg_dimensional",
+          "label": "Dimensional",
+          "tipo": "sim_na",
+          "obrigatorio": true,
+          "ativo": true,
+          "largura": "meia"
+        },
+        {
+          "id": "reg_dimensional_relatorio",
+          "label": "Relatório nº — Dimensional",
+          "tipo": "texto",
+          "obrigatorio": true,
+          "ativo": true,
+          "largura": "meia",
+          "codigo": true,
+          "exibirSe": { "campo": "reg_dimensional", "igual": "SIM" }
+        },
+
+        {
+          "id": "reg_end_superficial",
+          "label": "END Superficial",
+          "tipo": "sim_na",
+          "obrigatorio": true,
+          "ativo": true,
+          "largura": "meia"
+        },
+        {
+          "id": "reg_end_superficial_relatorio",
+          "label": "Relatório nº — END Superficial",
+          "tipo": "texto",
+          "obrigatorio": true,
+          "ativo": true,
+          "largura": "meia",
+          "codigo": true,
+          "exibirSe": { "campo": "reg_end_superficial", "igual": "SIM" }
+        },
+
+        {
+          "id": "reg_dureza",
+          "label": "Dureza",
+          "tipo": "sim_na",
+          "obrigatorio": true,
+          "ativo": true,
+          "largura": "meia"
+        },
+        {
+          "id": "reg_dureza_relatorio",
+          "label": "Relatório nº — Dureza",
+          "tipo": "texto",
+          "obrigatorio": true,
+          "ativo": true,
+          "largura": "meia",
+          "codigo": true,
+          "exibirSe": { "campo": "reg_dureza", "igual": "SIM" }
+        }
+      ]
+    },
+
+    {
+      "id": "anexos",
+      "titulo": "Anexos",
+      "ajuda": "Fotos da inspeção. Tire na hora ou escolha da galeria, quantas precisar.",
+      "ativo": true,
+      "campos": [
+        {
+          "id": "fotos_inspecao",
+          "label": "Fotos da inspeção",
+          "tipo": "foto",
+          "obrigatorio": false,
+          "ativo": true,
+          "largura": "inteira",
+          "multiplas": true,
+          "max": 0,
+          "camera": true,
+          "legenda": true,
+          "ajuda": "Cada foto aceita uma legenda curta, impressa abaixo dela no PDF e no DOCX."
+        }
+      ]
+    }
+  ],
+
+  "encerramento": {
+    "titulo": "Laudo",
+    "opcoesLaudo": [
+      { "valor": "aprovado",     "rotulo": "APROVADO",     "cor": "verde"    },
+      { "valor": "nao_conforme", "rotulo": "NÃO CONFORME", "cor": "vermelho" }
+    ],
+    "campoData": {
+      "id": "data_inspecao",
+      "label": "Data da inspeção",
+      "tipo": "data",
+      "obrigatorio": true,
+      "naoFuturo": true
+    },
+    "campoObs": {
+      "id": "observacoes",
+      "label": "OBS",
+      "tipo": "texto_longo",
+      "obrigatorio": false,
+      "obrigatorioSeNaoConforme": true,
+      "ajuda": "Descreva a não conformidade encontrada."
+    }
+  }
+}
